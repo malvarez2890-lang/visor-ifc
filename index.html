@@ -137,6 +137,7 @@ aside{width:340px;flex:none;border:2px solid var(--ink);background:var(--panel);
     <div class="file" id="fileName">Sin modelo</div>
     <label class="btn primary" for="ifcFile" id="openLbl">Abrir IFC</label>
     <input type="file" id="ifcFile" hidden>
+    <button class="btn" id="themeBtn" type="button" aria-label="Cambiar entre tema claro y oscuro"></button>
     <button class="btn" id="sheetBtn" type="button" aria-expanded="false" aria-controls="panel">Panel</button>
   </header>
   <main>
@@ -209,6 +210,7 @@ aside{width:340px;flex:none;border:2px solid var(--ink);background:var(--panel);
   </main>
 </div>
 
+<script>try{var t=localStorage.getItem("visor-theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
 <script type="module">
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
@@ -216,6 +218,16 @@ import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import * as WebIFC from "./vendor/web-ifc-api.js";
 
 const $ = s => document.querySelector(s);
+const isDark = () => { const t = document.documentElement.getAttribute("data-theme"); return t ? t === "dark" : matchMedia("(prefers-color-scheme: dark)").matches; };
+function paintThemeBtn() { $("#themeBtn").textContent = isDark() ? "Tema claro" : "Tema oscuro"; }
+$("#themeBtn").addEventListener("click", () => {
+  const t = isDark() ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", t);
+  try { localStorage.setItem("visor-theme", t); } catch (e) {}
+});
+matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", paintThemeBtn);
+new MutationObserver(paintThemeBtn).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+paintThemeBtn();
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const fmtN = (n, d = 2) => n.toFixed(d).replace(".", ",");
 
@@ -551,13 +563,13 @@ const cubeR = new THREE.WebGLRenderer({ canvas: vcCv, alpha: true, antialias: tr
 cubeR.setPixelRatio(Math.min(devicePixelRatio || 1, 2)); cubeR.setSize(CS, CS, false);
 const cubeScene = new THREE.Scene(), cubeCam = new THREE.PerspectiveCamera(32, 1, 0.1, 50);
 const FACES = ["Derecha", "Izquierda", "Superior", "Inferior", "Frontal", "Posterior"]; // +x -x +y -y +z -z
-const faceTex = (txt, rot) => {
+const faceTex = (txt, rot, bg, fg) => {
   const c = document.createElement("canvas"); c.width = c.height = 192;
   const g = c.getContext("2d");
-  g.fillStyle = "#f6f6f6"; g.fillRect(0, 0, 192, 192);
-  g.strokeStyle = "#000"; g.lineWidth = 6; g.strokeRect(3, 3, 186, 186);
+  g.fillStyle = bg; g.fillRect(0, 0, 192, 192);
+  g.strokeStyle = fg; g.lineWidth = 6; g.strokeRect(3, 3, 186, 186);
   g.translate(96, 96); g.rotate(rot || 0);
-  g.fillStyle = "#000"; g.textAlign = "center"; g.textBaseline = "middle";
+  g.fillStyle = fg; g.textAlign = "center"; g.textBaseline = "middle";
   let size = 34; const fnt = () => "700 " + size + "px 'Barlow Condensed','Arial Narrow',Arial,sans-serif";
   g.font = fnt();
   const label = txt.toUpperCase();
@@ -565,10 +577,19 @@ const faceTex = (txt, rot) => {
   g.fillText(label, 0, 2);
   const t = new THREE.CanvasTexture(c); t.anisotropy = 4; return t;
 };
-const cubeMats = FACES.map(f => new THREE.MeshBasicMaterial({ map: faceTex(f, f === "Superior" ? Math.PI : 0) }));
+const cubeMats = FACES.map(() => new THREE.MeshBasicMaterial());
 const cubeMesh = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), cubeMats);
 cubeScene.add(cubeMesh);
-cubeMesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(cubeMesh.geometry), new THREE.LineBasicMaterial({ color: 0x000000 })));
+const cubeEdgeMat = new THREE.LineBasicMaterial({ color: 0x000000 });
+cubeMesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(cubeMesh.geometry), cubeEdgeMat));
+function cubeTheme() {
+  const bg = cssv("--panel") || "#f6f6f6", fg = cssv("--ink") || "#000";
+  FACES.forEach((f, i) => { const old = cubeMats[i].map; cubeMats[i].map = faceTex(f, f === "Superior" ? Math.PI : 0, bg, fg); cubeMats[i].needsUpdate = true; if (old) old.dispose(); });
+  cubeEdgeMat.color.set(fg);
+}
+cubeTheme();
+new MutationObserver(cubeTheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", cubeTheme);
 const spots = [], spotMat = () => new THREE.MeshBasicMaterial({ color: 0x6b7785, transparent: true, opacity: 0.22, depthWrite: false });
 {
   const S = 0.3, O = 0.5 - S / 2 + 0.02, L = 1 - 2 * S - 0.06;
