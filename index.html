@@ -71,7 +71,10 @@ main{flex:1;min-height:0;display:flex;gap:12px}
 .pop .leg i{width:16px;height:16px;border:1px solid var(--ink);flex:none}
 .pop .ttl{padding:4px 14px 6px;font:600 11px var(--f-display);letter-spacing:.12em;text-transform:uppercase;color:var(--ink2)}
 .sect{position:absolute;left:8px;bottom:8px;display:none;align-items:center;gap:8px;flex-wrap:wrap;background:var(--panel);border:2px solid var(--ink);padding:6px 10px;max-width:calc(100% - 16px)}
-.sect.show{display:flex}
+.sect.show{display:flex;flex-direction:column;align-items:stretch;gap:4px}
+.srow{display:flex;align-items:center;gap:8px}
+.srow>.btn:first-child{min-width:62px;justify-content:center}
+.sect .sv{min-width:78px}
 .sect input[type=range]{width:min(220px,36vw);accent-color:var(--accent)}
 .sect span{font:500 12px var(--f-mono);color:var(--ink2);white-space:nowrap}
 .sect .btn{min-height:28px;padding:2px 8px;font-size:12px}
@@ -90,7 +93,7 @@ main{flex:1;min-height:0;display:flex;gap:12px}
 @media (max-width:820px){.vcube{top:104px;right:6px;width:84px}.vcube canvas{width:84px;height:84px}.vcube .rw button{width:26px;height:24px;font-size:14px}.room{padding:2px 5px 3px}.room b{font-size:11px}.room i{font-size:10px}}
 .mlabel{white-space:pre;text-align:center}
 .mbar{position:absolute;left:8px;bottom:8px;z-index:3;display:flex;flex-wrap:wrap;gap:4px;max-width:calc(100% - 140px)}
-.sect.show ~ .mbar{bottom:62px}
+.sect.show ~ .mbar{bottom:150px}
 .mbar .btn{min-height:30px;padding:2px 9px;font-size:12px}
 .mbar[hidden]{display:none}
 .setpop{position:fixed;right:16px;top:62px;z-index:20;width:290px;max-width:calc(100% - 32px);background:var(--panel);border:2px solid var(--ink);padding:10px 14px 12px;display:none}
@@ -217,13 +220,10 @@ aside{width:340px;flex:none;border:2px solid var(--ink);background:var(--panel);
       <div class="pop" id="layersPop" role="menu"></div>
       <div class="pop" id="viewsPop" role="menu"></div>
       <div class="sect" id="sectBox">
-        <span>Corte en</span>
-        <button class="btn on" data-ax="y" type="button">Altura</button>
-        <button class="btn" data-ax="x" type="button">Eje X</button>
-        <button class="btn" data-ax="z" type="button">Eje Z</button>
-        <input type="range" id="sectRange" min="0" max="100" value="100" aria-label="Posición del corte">
-        <span id="sectVal"></span>
-        <button class="btn" id="sectFlip" type="button" aria-pressed="false">Invertir</button>
+        <div class="srow" data-ax="x"><button class="btn" data-on type="button" aria-pressed="false">Eje X</button><input type="range" min="0" max="100" value="100" aria-label="Posición del corte en el eje X"><span class="sv">sin corte</span><button class="btn" data-flip type="button" aria-pressed="false">Invertir</button></div>
+        <div class="srow" data-ax="y"><button class="btn" data-on type="button" aria-pressed="false">Eje Y</button><input type="range" min="0" max="100" value="100" aria-label="Posición del corte en el eje Y"><span class="sv">sin corte</span><button class="btn" data-flip type="button" aria-pressed="false">Invertir</button></div>
+        <div class="srow" data-ax="z"><button class="btn" data-on type="button" aria-pressed="false">Eje Z</button><input type="range" min="0" max="100" value="100" aria-label="Posición del corte en el eje Z"><span class="sv">sin corte</span><button class="btn" data-flip type="button" aria-pressed="false">Invertir</button></div>
+        <div class="srow"><button class="btn" id="sectClear" type="button">Quitar cortes</button></div>
       </div>
       <div class="mbar" id="mBar" hidden>
         <button class="btn on" data-mt="dist" type="button">Distancia</button>
@@ -407,7 +407,7 @@ let box = new THREE.Box3(), R = 10, center = new THREE.Vector3(), H = 3, scaleNo
 let explodeK = 0, explodeTarget = 0, explodeFrom = 0, explodeT0 = 0;
 const matCache = new Map();
 const hiMat = new THREE.MeshStandardMaterial({ color: 0xff7a1a, emissive: 0xff5a00, emissiveIntensity: 0.55, roughness: 0.5, side: THREE.DoubleSide, clippingPlanes: [] });
-const xMat = new THREE.MeshStandardMaterial({ color: 0xff7a1a, emissive: 0xff5a00, emissiveIntensity: 0.4, roughness: 0.5, transparent: true, opacity: 0.3, depthWrite: false, side: THREE.DoubleSide, clippingPlanes: [] });
+const xMat = new THREE.MeshStandardMaterial({ color: 0x9fb4c4, roughness: 0.6, transparent: true, opacity: 0.16, depthWrite: false, side: THREE.DoubleSide, clippingPlanes: [] });
 const ghostMat = new THREE.MeshStandardMaterial({ color: 0xcfd3d6, roughness: 1, transparent: true, opacity: 0.07, depthWrite: false, side: THREE.DoubleSide, clippingPlanes: [] });
 const groundMat = new THREE.MeshStandardMaterial({ color: 0x8b9398, roughness: 1, metalness: 0, side: THREE.DoubleSide, clippingPlanes: [] });
 const skip = new Set(["IfcGeographicElement", "IfcSite"]);
@@ -565,7 +565,7 @@ async function loadBuffer(buf, label) {
     { const sc = sun.shadow.camera, e = R * 2.1; sc.left = -e; sc.right = e; sc.top = e; sc.bottom = -e; sc.near = R * 0.2; sc.far = R * 8; sc.updateProjectionMatrix();
       sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.03; }
     floatShadow.scale.setScalar(R * 2.2); floatShadow.position.set(center.x + R * 0.16, box.min.y - R * 0.1, center.z + R * 0.12);
-    capPlane.scale.setScalar(R * 8);
+    AXES.forEach(a => capMesh[a].scale.setScalar(R * 8));
     setupSection(); refreshMaterials(); applyLook(); scaleNow = 1; setView("iso", true);
     $("#fileName").textContent = label;
     skip.forEach(c => { if (classes.has(c)) classHidden.add(c); });
@@ -597,8 +597,8 @@ function matFor(m) {
 function refreshMaterials() {
   for (const m of meshes) {
     const eid = m.userData.eid;
-    m.material = eid === selected ? (xray ? xMat : hiMat) : (isolated && !isolated.has(eid) ? ghostMat : matFor(m));
-    m.castShadow = !(isolated && !isolated.has(eid));
+    m.material = eid === selected ? hiMat : (xray ? xMat : (isolated && !isolated.has(eid) ? ghostMat : matFor(m)));
+    m.castShadow = !(isolated && !isolated.has(eid)) && !(xray && eid !== selected);
   }
   applyClipToMaterials();
 }
@@ -650,13 +650,13 @@ function setView(v, instant) {
 function showRoofAgain() { if (roomsOn) setRooms(false); if (roofHidden) { setRoof(false); roofAuto = false; } }
 function viewHooks(k) {
   if (k === "top") {
-    if (clip.on) return;
-    clipAuto = true; clip.axis = "y"; clip.flip = false;
-    clip.t = Math.min(1, Math.max(0, (floorY + 1 - box.min.y) / Math.max(box.max.y - box.min.y, 1e-6)));
-    $("#sectRange").value = Math.round(clip.t * 100); setPressed("#sectFlip", false);
-    document.querySelectorAll("#sectBox [data-ax]").forEach(b => b.classList.toggle("on", b.dataset.ax === "y"));
-    setClipOn(true);
-  } else if (clipAuto) { clipAuto = false; setupSection(); }
+    if (clip.y.on) return;
+    clipAuto = true; clip.y.on = true; clip.y.flip = false;
+    clip.y.t = Math.min(1, Math.max(0, (floorY + 1 - box.min.y) / Math.max(box.max.y - box.min.y, 1e-6)));
+    syncSectUI(); showSect(true); updateClip();
+  } else if (clipAuto) {
+    clipAuto = false; clip.y.on = false; clip.y.flip = false; clip.y.t = 1; syncSectUI(); updateClip(); if (!anyCut()) showSect(false);
+  }
   if (k !== "top" && roofAuto && !roomsOn) { setRoof(false); roofAuto = false; }
 }
 ["#sectBox", "#bSection"].forEach(q => $(q).addEventListener("pointerdown", () => { clipAuto = false; }));
@@ -828,49 +828,78 @@ function applyExplode(e) {
 }
 
 /* ---------- corte con relleno negro (poché) ---------- */
-const clip = { on: false, axis: "y", flip: false, t: 1 };
+const AXES = ["x", "y", "z"];
+const clip = { x: { on: false, flip: false, t: 1 }, y: { on: false, flip: false, t: 1 }, z: { on: false, flip: false, t: 1 } };
 let clipAuto = false, floorY = 0;
 const clipArr = [];
+const clipPlanes = { x: new THREE.Plane(new THREE.Vector3(-1, 0, 0), 0), y: new THREE.Plane(new THREE.Vector3(0, -1, 0), 0), z: new THREE.Plane(new THREE.Vector3(0, 0, -1), 0) };
+const AX = { x: new THREE.Vector3(-1, 0, 0), y: new THREE.Vector3(0, -1, 0), z: new THREE.Vector3(0, 0, -1) };
+const stencilMat = {}, capMesh = {}, caps = { x: new Map(), y: new Map(), z: new Map() };
+AXES.forEach((a, i) => {
+  stencilMat[a] = new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: false, depthTest: false, side: THREE.DoubleSide,
+    stencilWrite: true, stencilFunc: THREE.AlwaysStencilFunc, stencilFail: THREE.InvertStencilOp, stencilZFail: THREE.InvertStencilOp, stencilZPass: THREE.InvertStencilOp });
+  const cm = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.DoubleSide,
+    stencilWrite: true, stencilRef: 0, stencilFunc: THREE.NotEqualStencilFunc, stencilFail: THREE.ReplaceStencilOp, stencilZFail: THREE.ReplaceStencilOp, stencilZPass: THREE.ReplaceStencilOp }));
+  cm.renderOrder = 11 + i * 2; cm.visible = false; scene.add(cm); capMesh[a] = cm;
+});
 function applyClipToMaterials() {
-  const want = clipArr, mats = new Set([hiMat, xMat, ghostMat, groundMat, stencilMat]);
+  const want = clipArr, mats = new Set([hiMat, xMat, ghostMat, groundMat]);
   matCache.forEach(m => mats.add(m));
   mats.forEach(m => { if ((m.clippingPlanes || []).length !== want.length) m.needsUpdate = true; m.clippingPlanes = want; });
+  // la plantilla de cada eje se recorta solo con su plano; su tapa, con los demás
+  AXES.forEach(a => { const sm = stencilMat[a], own = clipArr.includes(clipPlanes[a]) ? [clipPlanes[a]] : []; if ((sm.clippingPlanes || []).length !== own.length) sm.needsUpdate = true; sm.clippingPlanes = own; });
+  AXES.forEach(a => { const mt = capMesh[a].material, o = clipArr.filter(p => p !== clipPlanes[a]); if ((mt.clippingPlanes || []).length !== o.length) mt.needsUpdate = true; mt.clippingPlanes = o; });
 }
-const stencilMat = new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: false, depthTest: false, side: THREE.DoubleSide,
-  stencilWrite: true, stencilFunc: THREE.AlwaysStencilFunc, stencilFail: THREE.InvertStencilOp, stencilZFail: THREE.InvertStencilOp, stencilZPass: THREE.InvertStencilOp });
-const capPlane = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.DoubleSide,
-  stencilWrite: true, stencilRef: 0, stencilFunc: THREE.NotEqualStencilFunc, stencilFail: THREE.ReplaceStencilOp, stencilZFail: THREE.ReplaceStencilOp, stencilZPass: THREE.ReplaceStencilOp }));
-capPlane.renderOrder = 1.1; capPlane.visible = false; scene.add(capPlane);
-const caps = new Map();
-function removeCaps() { caps.forEach(tw => scene.remove(tw)); caps.clear(); capPlane.visible = false; clipArr.length = 0; }
-const AX = { y: new THREE.Vector3(0, -1, 0), x: new THREE.Vector3(-1, 0, 0), z: new THREE.Vector3(0, 0, -1) };
+function removeCaps() { AXES.forEach(a => { caps[a].forEach(tw => scene.remove(tw)); caps[a].clear(); capMesh[a].visible = false; }); clipArr.length = 0; }
+const anyCut = () => AXES.some(a => clip[a].on && !(clip[a].t >= 0.999 && !clip[a].flip));
 function updateClip() {
-  const lo = box.min[clip.axis], hi = box.max[clip.axis], s = clip.flip ? -1 : 1, v = lo + (hi - lo) * clip.t;
-  const active = clip.on && !(clip.t >= 0.999 && !clip.flip);
-  $("#sectVal").textContent = active ? fmtN(v - lo) + " m" : "sin corte";
-  if (!active) { removeCaps(); applyClipToMaterials(); return; }
-  clipPlane.normal.copy(AX[clip.axis]).multiplyScalar(s); clipPlane.constant = s * v;
-  if (!clipArr.length) clipArr.push(clipPlane);
+  clipArr.length = 0; const act = [];
+  AXES.forEach(a => {
+    const c = clip[a], lo = box.min[a], hi = box.max[a], s = c.flip ? -1 : 1, v = lo + (hi - lo) * c.t;
+    const active = c.on && !(c.t >= 0.999 && !c.flip);
+    document.querySelector('#sectBox [data-ax="' + a + '"] .sv').textContent = active ? fmtN(v - lo) + " m" : "sin corte";
+    if (active) { clipPlanes[a].normal.copy(AX[a]).multiplyScalar(s); clipPlanes[a].constant = s * v; clipArr.push(clipPlanes[a]); act.push(a); }
+  });
+  AXES.forEach(a => { if (!act.includes(a)) { caps[a].forEach(tw => scene.remove(tw)); caps[a].clear(); capMesh[a].visible = false; } });
   applyClipToMaterials();
-  capPlane.visible = true;
-  for (const m of meshes) {
-    if (caps.has(m) || skip.has(m.userData.cls)) continue;
-    const tw = new THREE.Mesh(m.geometry, stencilMat); tw.renderOrder = 1; tw.matrixAutoUpdate = false; tw.userData.eid = m.userData.eid;
-    scene.add(tw); caps.set(m, tw);
-  }
+  act.forEach((a, k) => {
+    capMesh[a].visible = true;
+    for (const m of meshes) {
+      if (caps[a].has(m) || skip.has(m.userData.cls)) continue;
+      const tw = new THREE.Mesh(m.geometry, stencilMat[a]); tw.renderOrder = 10 + AXES.indexOf(a) * 2; tw.matrixAutoUpdate = false; tw.userData.eid = m.userData.eid;
+      scene.add(tw); caps[a].set(m, tw);
+    }
+  });
+  setPressed("#bSection", $("#sectBox").classList.contains("show") || anyCut());
 }
-function setClipOn(on) { clip.on = on; $("#sectBox").classList.toggle("show", on); setPressed("#bSection", on); updateClip(); }
+function syncSectUI() {
+  AXES.forEach(a => {
+    const r = document.querySelector('#sectBox [data-ax="' + a + '"]'), c = clip[a];
+    r.querySelector("[data-on]").classList.toggle("on", c.on); r.querySelector("[data-on]").setAttribute("aria-pressed", String(c.on));
+    r.querySelector("input").value = Math.round(c.t * 100);
+    r.querySelector("[data-flip]").classList.toggle("on", c.flip); r.querySelector("[data-flip]").setAttribute("aria-pressed", String(c.flip));
+  });
+}
+function showSect(on) { $("#sectBox").classList.toggle("show", on); setPressed("#bSection", on || anyCut()); }
 function setupSection() {
-  clip.axis = "y"; clip.flip = false; clip.t = 1; $("#sectRange").value = 100; setPressed("#sectFlip", false);
-  document.querySelectorAll("#sectBox [data-ax]").forEach(b => b.classList.toggle("on", b.dataset.ax === "y")); setClipOn(false);
+  AXES.forEach(a => { clip[a].on = false; clip[a].flip = false; clip[a].t = 1; });
+  syncSectUI(); showSect(false); updateClip();
 }
-$("#bSection").addEventListener("click", () => meshes.length && setClipOn(!clip.on));
-$("#sectRange").addEventListener("input", e => { clip.t = Number(e.target.value) / 100; updateClip(); });
-$("#sectFlip").addEventListener("click", () => { clip.flip = !clip.flip; setPressed("#sectFlip", clip.flip); updateClip(); });
-document.querySelectorAll("#sectBox [data-ax]").forEach(b => b.addEventListener("click", () => {
-  clip.axis = b.dataset.ax; clip.t = 1; $("#sectRange").value = 100;
-  document.querySelectorAll("#sectBox [data-ax]").forEach(x => x.classList.toggle("on", x === b)); updateClip();
-}));
+$("#bSection").addEventListener("click", () => { if (meshes.length) showSect(!$("#sectBox").classList.contains("show")); });
+$("#sectBox").addEventListener("click", e => {
+  const r = e.target.closest("[data-ax]");
+  if (e.target.id === "sectClear") { setupSection(); showSect(true); return; }
+  if (!r) return;
+  const a = r.dataset.ax, c = clip[a];
+  if (e.target.closest("[data-on]")) { c.on = !c.on; if (c.on && c.t >= 0.999 && !c.flip) c.t = 0.5; }
+  else if (e.target.closest("[data-flip]")) { c.flip = !c.flip; c.on = true; if (c.t >= 0.999 && c.flip) c.t = 0.5; }
+  else return;
+  syncSectUI(); updateClip();
+});
+$("#sectBox").addEventListener("input", e => {
+  const r = e.target.closest("[data-ax]"); if (!r || e.target.type !== "range") return;
+  const c = clip[r.dataset.ax]; c.t = Number(e.target.value) / 100; c.on = true; syncSectUI(); updateClip();
+});
 
 /* ---------- vistas guardadas ---------- */
 let savedViews = [];
@@ -880,7 +909,7 @@ function persistViews() { try { localStorage.setItem(viewsKey(), JSON.stringify(
 function captureView(name) {
   return { name, pos: camera.position.toArray(), tgt: controls.target.toArray(), roof: roofHidden, col: colorMode,
     hid: [...classHidden], eh: [...elemHidden], iso: isolated ? [...isolated] : null,
-    clip: { on: clip.on, axis: clip.axis, flip: clip.flip, t: clip.t } };
+    clip: { x: { ...clip.x }, y: { ...clip.y }, z: { ...clip.z } } };
 }
 function applySavedView(v) {
   classHidden.clear(); v.hid.forEach(c => classHidden.add(c));
@@ -888,10 +917,10 @@ function applySavedView(v) {
   treeHidden.clear(); isolated = v.iso ? new Set(v.iso) : null; roofAuto = false;
   colorMode = v.col || colorMode; applyLook();
   setRoof(!!v.roof);
-  clipAuto = false; clip.axis = v.clip.axis; clip.flip = v.clip.flip; clip.t = v.clip.t;
-  $("#sectRange").value = Math.round(clip.t * 100); setPressed("#sectFlip", clip.flip);
-  document.querySelectorAll("#sectBox [data-ax]").forEach(b => b.classList.toggle("on", b.dataset.ax === clip.axis));
-  setClipOn(!!v.clip.on);
+  clipAuto = false;
+  AXES.forEach(a => { clip[a].on = false; clip[a].flip = false; clip[a].t = 1; });
+  if (v.clip.x) AXES.forEach(a => Object.assign(clip[a], v.clip[a])); else if (v.clip.axis) Object.assign(clip[v.clip.axis], { on: !!v.clip.on, flip: v.clip.flip, t: v.clip.t });
+  syncSectUI(); updateClip(); showSect(anyCut());
   document.querySelectorAll("#gViews .btn").forEach(b => b.classList.remove("on"));
   flyTo(new THREE.Vector3(...v.pos), new THREE.Vector3(...v.tgt), 800);
   if ($("#colorPop").classList.contains("show")) renderColorPop();
@@ -1101,7 +1130,7 @@ function pick(ev) {
   ndc.set(((ev.clientX - r.left) / r.width) * 2 - 1, -((ev.clientY - r.top) / r.height) * 2 + 1);
   ray.setFromCamera(ndc, camera);
   const vis = meshes.filter(m => m.visible && !(isolated && !isolated.has(m.userData.eid)));
-  return ray.intersectObjects(vis, false).find(h => !clipArr.length || clipPlane.distanceToPoint(h.point) >= -1e-6) || null;
+  return ray.intersectObjects(vis, false).find(h => clipArr.every(p => p.distanceToPoint(h.point) >= -1e-6)) || null;
 }
 canvas.addEventListener("pointerdown", e => { down = { x: e.clientX, y: e.clientY, t: performance.now() }; });
 canvas.addEventListener("pointerup", e => {
@@ -1227,10 +1256,11 @@ function loop() {
     explodeK = kk >= 1 ? explodeTarget : explodeFrom + (explodeTarget - explodeFrom) * kk;
     applyExplode(explodeK * explodeK * (3 - 2 * explodeK));
   }
-  if (caps.size) {
-    caps.forEach((tw, src) => { tw.matrix.copy(src.matrix); tw.matrixWorldNeedsUpdate = true; tw.visible = src.visible && !(isolated && !isolated.has(src.userData.eid)); });
-    clipPlane.coplanarPoint(capPos); capPlane.position.copy(capPos);
-    capPlane.lookAt(capPos.x + clipPlane.normal.x, capPos.y + clipPlane.normal.y, capPos.z + clipPlane.normal.z);
+  for (const a of AXES) {
+    const mp = caps[a]; if (!mp.size) continue;
+    mp.forEach((tw, src) => { tw.matrix.copy(src.matrix); tw.matrixWorldNeedsUpdate = true; tw.visible = src.visible && !(isolated && !isolated.has(src.userData.eid)); });
+    const pl = clipPlanes[a]; pl.coplanarPoint(capPos); capMesh[a].position.copy(capPos);
+    capMesh[a].lookAt(capPos.x + pl.normal.x, capPos.y + pl.normal.y, capPos.z + pl.normal.z);
   }
   controls.update(); renderer.render(scene, camera); placeLabel(); renderCube(); placeRooms();
 }
