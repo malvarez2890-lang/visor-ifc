@@ -2,7 +2,20 @@
 <html lang="es"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Visor IFC</title>
+<title>Visor IFC online gratis | Abra modelos BIM en su navegador</title>
+<meta name="description" content="Visor IFC gratuito: abra archivos IFC en el navegador, en computador, tablet o celular. Cortes, mediciones, explosión, vistas guardadas y propiedades. Sin subir archivos.">
+<link rel="canonical" href="https://malvarez2890-lang.github.io/visor-ifc/">
+<link rel="alternate" hreflang="es" href="https://malvarez2890-lang.github.io/visor-ifc/es/">
+<link rel="alternate" hreflang="en" href="https://malvarez2890-lang.github.io/visor-ifc/en/">
+<link rel="alternate" hreflang="x-default" href="https://malvarez2890-lang.github.io/visor-ifc/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Visor IFC">
+<meta property="og:title" content="Visor IFC online gratis">
+<meta property="og:description" content="Visor IFC gratuito: abra archivos IFC en el navegador, en computador, tablet o celular. Cortes, mediciones, explosión, vistas guardadas y propiedades. Sin subir archivos.">
+<meta property="og:url" content="https://malvarez2890-lang.github.io/visor-ifc/">
+<meta property="og:locale" content="es_CL">
+<meta name="robots" content="index, follow">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Visor IFC","url":"https://malvarez2890-lang.github.io/visor-ifc/","description":"Visor IFC gratuito: abra archivos IFC en el navegador, en computador, tablet o celular. Cortes, mediciones, explosión, vistas guardadas y propiedades. Sin subir archivos.","applicationCategory":"DesignApplication","applicationSubCategory":"IFC / BIM viewer","operatingSystem":"Web browser","inLanguage":["es","en"],"isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"CLP"}}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -24,6 +37,7 @@
   --bg:#101315; --panel:#171b1e; --ink:#eef0f1; --ink2:#9aa3a9; --line:#2d3439; --viewport:#1d2226;
   --accent:#ff8a3d; --accent-ink:#111; --hover:#1f2529; color-scheme:dark}
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.4 var(--f-body);
@@ -37,8 +51,8 @@ header{display:flex;align-items:center;gap:10px;flex-wrap:wrap;min-width:0}
 .btn{display:inline-flex;align-items:center;gap:6px;border:2px solid var(--ink);background:var(--panel);padding:6px 12px;cursor:pointer;
   font:600 13px var(--f-display);letter-spacing:.08em;text-transform:uppercase;min-height:36px;touch-action:manipulation}
 .btn:hover{background:var(--hover)}
-#themeBtn{padding:6px 9px}
-#themeBtn svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#themeBtn,#setBtn{padding:6px 9px}
+#themeBtn svg,#setBtn svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .btn.on,.btn.primary{background:var(--ink);color:var(--panel)}
 .btn:focus-visible,.row:focus-visible,.tab:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:1px}
 main{flex:1;min-height:0;display:flex;gap:12px}
@@ -74,6 +88,29 @@ main{flex:1;min-height:0;display:flex;gap:12px}
 .room b{display:block;font:600 14px var(--f-display);text-transform:uppercase;letter-spacing:.03em}
 .room i{display:block;font:400 12px var(--f-mono);font-style:normal;color:var(--ink2)}
 @media (max-width:820px){.vcube{top:104px;right:6px;width:84px}.vcube canvas{width:84px;height:84px}.vcube .rw button{width:26px;height:24px;font-size:14px}.room{padding:2px 5px 3px}.room b{font-size:11px}.room i{font-size:10px}}
+.mlabel{white-space:pre;text-align:center}
+.mbar{position:absolute;left:8px;bottom:8px;z-index:3;display:flex;flex-wrap:wrap;gap:4px;max-width:calc(100% - 140px)}
+.sect.show ~ .mbar{bottom:62px}
+.mbar .btn{min-height:30px;padding:2px 9px;font-size:12px}
+.mbar[hidden]{display:none}
+.setpop{position:fixed;right:16px;top:62px;z-index:20;width:290px;max-width:calc(100% - 32px);background:var(--panel);border:2px solid var(--ink);padding:10px 14px 12px;display:none}
+.setpop.show{display:block}
+.setpop .ttl{font:600 11px var(--f-display);letter-spacing:.12em;text-transform:uppercase;color:var(--ink2);margin:6px 0 4px}
+.setpop .fr{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:4px 0;font-size:14px}
+.setpop select{border:2px solid var(--ink);background:var(--panel);color:var(--ink);padding:3px 6px;min-height:30px;font:inherit}
+.setpop label.fr{cursor:pointer}
+.setpop input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
+.setpop p{margin:8px 0 0;font:400 12px/1.4 var(--f-mono);color:var(--ink2)}
+.seg{display:flex;border-bottom:1px solid var(--line)}
+.seg button{flex:1;border:0;background:transparent;padding:8px 6px;cursor:pointer;font:600 12px var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:var(--ink2);min-height:36px}
+.seg button[aria-pressed="true"]{background:var(--hover);color:var(--ink);box-shadow:inset 0 -3px 0 var(--accent)}
+.row .chev{width:12px;flex:none;color:var(--ink2);font-size:12px}
+.eye.sm{width:30px;height:30px}
+.vlist{display:grid;gap:4px;padding:4px 14px 2px}
+.vlist .vr{display:flex;align-items:center;gap:6px}
+.vlist .vr .btn{min-height:28px;padding:2px 8px;font-size:12px}
+.vlist .vr .go{flex:1;justify-content:flex-start;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pop input[type=text]{width:100%;border:2px solid var(--ink);background:var(--panel);color:var(--ink);padding:4px 8px;min-height:30px;font:inherit}
 .hint{position:absolute;right:8px;bottom:8px;background:var(--panel);border:1px solid var(--line);padding:4px 8px;font:400 12px var(--f-mono);color:var(--ink2);max-width:calc(100% - 16px);pointer-events:none}
 .sect.show ~ .hint{display:none}
 .mlabel{position:absolute;transform:translate(-50%,-130%);background:var(--ink);color:var(--panel);padding:3px 8px;font:600 13px var(--f-mono);pointer-events:none;white-space:nowrap}
@@ -133,15 +170,26 @@ aside{width:340px;flex:none;border:2px solid var(--ink);background:var(--panel);
 </style>
 
 </head><body>
+<noscript><h1>Visor IFC online gratis</h1><p>Visor IFC abre archivos IFC en el navegador, sin subirlos a ningún servidor. Necesita JavaScript y WebGL.</p><p><a href="es/">Qué puede hacer (español)</a> · <a href="en/">What it can do (English)</a></p></noscript>
 <div id="app">
   <header>
     <div class="brand">Visor IFC</div>
     <div class="file" id="fileName">Sin modelo</div>
     <label class="btn primary" for="ifcFile" id="openLbl">Abrir IFC</label>
     <input type="file" id="ifcFile" hidden>
+    <button class="btn" id="setBtn" type="button" aria-label="Controles del mouse" title="Controles del mouse" aria-expanded="false" aria-controls="setPop"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg></button>
     <button class="btn" id="themeBtn" type="button" aria-label="Cambiar entre tema claro y oscuro"></button>
     <button class="btn" id="sheetBtn" type="button" aria-expanded="false" aria-controls="panel">Panel</button>
   </header>
+  <div class="setpop" id="setPop" role="dialog" aria-label="Controles del mouse">
+    <div class="ttl">Controles del mouse</div>
+    <label class="fr">Preajuste <select id="mPreset"><option value="revit">Estilo Revit</option><option value="std">Estándar</option><option value="rhino">Estilo Rhino</option><option value="custom">Personalizado</option></select></label>
+    <label class="fr">Botón izquierdo <select id="mL"><option value="rotate">Girar</option><option value="pan">Desplazar</option><option value="zoom">Zoom</option><option value="none">Nada</option></select></label>
+    <label class="fr">Botón central <select id="mM"><option value="rotate">Girar</option><option value="pan">Desplazar</option><option value="zoom">Zoom</option><option value="none">Nada</option></select></label>
+    <label class="fr">Botón derecho <select id="mR"><option value="rotate">Girar</option><option value="pan">Desplazar</option><option value="zoom">Zoom</option><option value="none">Nada</option></select></label>
+    <label class="fr">Zoom hacia el cursor <input type="checkbox" id="mCur"></label>
+    <p>La rueda acerca y aleja. Con Mayús, girar y desplazar se intercambian.</p>
+  </div>
   <main>
     <div id="stage" class="empty">
       <canvas id="cv" aria-label="Vista 3D del modelo IFC"></canvas>
@@ -159,12 +207,15 @@ aside{width:340px;flex:none;border:2px solid var(--ink);background:var(--panel);
           <button class="btn" id="bSection" type="button" aria-pressed="false">Corte</button>
           <button class="btn" id="bMeasure" type="button" aria-pressed="false">Medir</button>
           <button class="btn" id="bRooms" type="button" aria-pressed="false" hidden>Recintos</button>
+          <button class="btn" id="bViews" type="button" aria-haspopup="true" aria-expanded="false">Vistas</button>
+          <button class="btn" id="bXray" type="button" aria-pressed="false">Rayos X</button>
           <button class="btn" id="bExplode" type="button" aria-pressed="false">Explotar</button>
           <button class="btn" id="bShowAll" type="button">Mostrar todo</button>
         </div>
       </div>
       <div class="pop" id="colorPop" role="menu"></div>
       <div class="pop" id="layersPop" role="menu"></div>
+      <div class="pop" id="viewsPop" role="menu"></div>
       <div class="sect" id="sectBox">
         <span>Corte en</span>
         <button class="btn on" data-ax="y" type="button">Altura</button>
@@ -173,6 +224,14 @@ aside{width:340px;flex:none;border:2px solid var(--ink);background:var(--panel);
         <input type="range" id="sectRange" min="0" max="100" value="100" aria-label="Posición del corte">
         <span id="sectVal"></span>
         <button class="btn" id="sectFlip" type="button" aria-pressed="false">Invertir</button>
+      </div>
+      <div class="mbar" id="mBar" hidden>
+        <button class="btn on" data-mt="dist" type="button">Distancia</button>
+        <button class="btn" data-mt="ang" type="button">Ángulo</button>
+        <button class="btn" data-mt="poly" type="button">Polilínea</button>
+        <button class="btn" id="mClose" type="button" hidden>Cerrar</button>
+        <button class="btn" data-mt="box" type="button">Caja de pieza</button>
+        <button class="btn" id="mClear" type="button">Borrar</button>
       </div>
       <div class="vcube" id="vcube">
         <canvas id="vcCv" aria-label="Cubo de orientación"></canvas>
@@ -201,6 +260,7 @@ aside{width:340px;flex:none;border:2px solid var(--ink);background:var(--panel);
       </div>
       <div class="pane" id="paneModel" role="tabpanel" aria-labelledby="tabModel">
         <div class="search"><input type="search" id="q" placeholder="Buscar por nombre, clase o ID" aria-label="Buscar elementos"></div>
+        <div class="seg" id="seg"><button id="segCls" type="button" aria-pressed="true">Clases</button><button id="segFloors" type="button" aria-pressed="false" hidden>Pisos</button></div>
         <div class="sum" id="sum">Sin modelo cargado</div>
         <div id="list"></div>
       </div>
@@ -280,6 +340,29 @@ controls.enableDamping = true; controls.screenSpacePanning = true;
 controls.mouseButtons = { LEFT: THREE.MOUSE.ROTATE, MIDDLE: THREE.MOUSE.PAN, RIGHT: THREE.MOUSE.ROTATE };
 const root = new THREE.Group(); scene.add(root);
 const aux = new THREE.Group(); scene.add(aux);
+/* ---------- controles del mouse (configurables) ---------- */
+const MOUSE_PRESETS = {
+  revit: { L: "rotate", M: "pan", R: "rotate", cursor: false },
+  std: { L: "rotate", M: "zoom", R: "pan", cursor: false },
+  rhino: { L: "none", M: "pan", R: "rotate", cursor: true }
+};
+const MOUSE_ACT = { rotate: THREE.MOUSE.ROTATE, pan: THREE.MOUSE.PAN, zoom: THREE.MOUSE.DOLLY, none: -1 };
+let mouseCfg = { preset: "revit", ...MOUSE_PRESETS.revit };
+try { const sv = JSON.parse(localStorage.getItem("visor-mouse") || "null"); if (sv && sv.L && sv.M && sv.R) mouseCfg = sv; } catch (e) {}
+function applyMouse() {
+  controls.mouseButtons = { LEFT: MOUSE_ACT[mouseCfg.L], MIDDLE: MOUSE_ACT[mouseCfg.M], RIGHT: MOUSE_ACT[mouseCfg.R] };
+  controls.zoomToCursor = !!mouseCfg.cursor;
+  $("#mPreset").value = mouseCfg.preset; $("#mL").value = mouseCfg.L; $("#mM").value = mouseCfg.M; $("#mR").value = mouseCfg.R; $("#mCur").checked = !!mouseCfg.cursor;
+  canvas.style.cursor = mouseCfg.L === "rotate" || mouseCfg.L === "pan" ? "" : "default";
+  try { localStorage.setItem("visor-mouse", JSON.stringify(mouseCfg)); } catch (e) {}
+}
+$("#mPreset").addEventListener("change", e => { const p = MOUSE_PRESETS[e.target.value]; if (p) { mouseCfg = { preset: e.target.value, ...p }; applyMouse(); } });
+[["#mL", "L"], ["#mM", "M"], ["#mR", "R"]].forEach(([q, k]) => $(q).addEventListener("change", e => { mouseCfg[k] = e.target.value; mouseCfg.preset = "custom"; applyMouse(); }));
+$("#mCur").addEventListener("change", e => { mouseCfg.cursor = e.target.checked; mouseCfg.preset = "custom"; applyMouse(); });
+$("#setBtn").addEventListener("click", () => { const on = !$("#setPop").classList.contains("show"); $("#setPop").classList.toggle("show", on); $("#setBtn").setAttribute("aria-expanded", String(on)); });
+document.addEventListener("pointerdown", e => { if (!e.target.closest("#setPop,#setBtn")) { $("#setPop").classList.remove("show"); $("#setBtn").setAttribute("aria-expanded", "false"); } });
+applyMouse();
+
 const clipPlane = new THREE.Plane(new THREE.Vector3(0, -1, 0), 1e9);
 
 const bgClay = (() => {
@@ -319,11 +402,12 @@ new ResizeObserver(resize).observe(stage); resize();
 const api = new WebIFC.IfcAPI();
 let apiReady = null, modelID = -1;
 const classHidden = new Set(), elemHidden = new Set();
-let isolated = null, selected = null, roofHidden = false, roofAuto = false, roomsOn = false, roofSet = new Set(), roomItems = [];
+let isolated = null, selected = null, roofHidden = false, roofAuto = false, roomsOn = false, roofSet = new Set(), roomItems = [], xray = false;
 let box = new THREE.Box3(), R = 10, center = new THREE.Vector3(), H = 3, scaleNow = 1;
 let explodeK = 0, explodeTarget = 0, explodeFrom = 0, explodeT0 = 0;
 const matCache = new Map();
 const hiMat = new THREE.MeshStandardMaterial({ color: 0xff7a1a, emissive: 0xff5a00, emissiveIntensity: 0.55, roughness: 0.5, side: THREE.DoubleSide, clippingPlanes: [] });
+const xMat = new THREE.MeshStandardMaterial({ color: 0xff7a1a, emissive: 0xff5a00, emissiveIntensity: 0.4, roughness: 0.5, transparent: true, opacity: 0.3, depthWrite: false, side: THREE.DoubleSide, clippingPlanes: [] });
 const ghostMat = new THREE.MeshStandardMaterial({ color: 0xcfd3d6, roughness: 1, transparent: true, opacity: 0.07, depthWrite: false, side: THREE.DoubleSide, clippingPlanes: [] });
 const groundMat = new THREE.MeshStandardMaterial({ color: 0x8b9398, roughness: 1, metalness: 0, side: THREE.DoubleSide, clippingPlanes: [] });
 const skip = new Set(["IfcGeographicElement", "IfcSite"]);
@@ -351,7 +435,7 @@ function clearModel() {
   root.clear(); matCache.forEach(m => m.dispose()); matCache.clear();
   if (modelID >= 0) { try { api.CloseModel(modelID); } catch (e) {} modelID = -1; }
   meshes = []; byEid = new Map(); classes = new Map(); names = new Map(); centers = new Map(); roofSet = new Set();
-  classHidden.clear(); elemHidden.clear(); isolated = null; roofHidden = false; roofAuto = false; clipAuto = false; explodeK = 0; explodeTarget = 0;
+  classHidden.clear(); elemHidden.clear(); isolated = null; roofHidden = false; roofAuto = false; clipAuto = false; xray = false; setPressed("#bXray", false); treeHidden.clear(); isoNode = null; explodeK = 0; explodeTarget = 0;
   roomItems = []; $("#rooms").innerHTML = ""; roomsOn = false; setPressed("#bRooms", false); $("#bRooms").hidden = true; $("#rooms").hidden = true;
   setPressed("#bRoof", false); setPressed("#bExplode", false); $("#bExplode").textContent = "Explotar"; $("#bRoof").textContent = "Ocultar cubierta";
 }
@@ -485,7 +569,7 @@ async function loadBuffer(buf, label) {
     setupSection(); refreshMaterials(); applyLook(); scaleNow = 1; setView("iso", true);
     $("#fileName").textContent = label;
     skip.forEach(c => { if (classes.has(c)) classHidden.add(c); });
-    loadRooms(); applyVisibility(); statusOff(); $("#q").value = "";
+    buildSpatial(); loadSavedViews(); loadRooms(); applyVisibility(); statusOff(); $("#q").value = "";
   } catch (e) {
     console.error(e);
     status("No se pudo abrir el archivo", "El IFC puede estar dañado o usar una versión que el visor no lee. Detalle: " + (e && e.message ? e.message : e), false);
@@ -513,7 +597,7 @@ function matFor(m) {
 function refreshMaterials() {
   for (const m of meshes) {
     const eid = m.userData.eid;
-    m.material = eid === selected ? hiMat : (isolated && !isolated.has(eid) ? ghostMat : matFor(m));
+    m.material = eid === selected ? (xray ? xMat : hiMat) : (isolated && !isolated.has(eid) ? ghostMat : matFor(m));
     m.castShadow = !(isolated && !isolated.has(eid));
   }
   applyClipToMaterials();
@@ -686,7 +770,7 @@ function renderCube() {
 function applyVisibility() {
   for (const m of meshes) {
     const eid = m.userData.eid;
-    m.visible = !classHidden.has(m.userData.cls) && !elemHidden.has(eid) && !(roofHidden && roofSet.has(eid));
+    m.visible = !classHidden.has(m.userData.cls) && !elemHidden.has(eid) && !treeHidden.has(eid) && !(roofHidden && roofSet.has(eid));
   }
   refreshMaterials(); buildList();
   if ($("#layersPop").classList.contains("show")) renderLayersPop();
@@ -708,8 +792,11 @@ function setRoof(hide) {
   roofHidden = hide; setPressed("#bRoof", hide); $("#bRoof").textContent = hide ? "Mostrar cubierta" : "Ocultar cubierta"; applyVisibility();
 }
 $("#bShowAll").addEventListener("click", () => {
-  classHidden.clear(); skip.forEach(c => { if (classes.has(c)) classHidden.add(c); }); elemHidden.clear(); isolated = null; roofAuto = false;
+  classHidden.clear(); skip.forEach(c => { if (classes.has(c)) classHidden.add(c); }); elemHidden.clear(); treeHidden.clear(); isoNode = null; isolated = null; roofAuto = false;
   setRoof(false); renderProps(selected);
+});
+$("#bXray").addEventListener("click", () => {
+  if (!meshes.length) return; xray = !xray; setPressed("#bXray", xray); refreshMaterials(); if (selected != null) renderProps(selected);
 });
 $("#bRoof").addEventListener("click", () => { if (!meshes.length) return; roofAuto = false; setRoof(!roofHidden); });
 
@@ -745,7 +832,7 @@ const clip = { on: false, axis: "y", flip: false, t: 1 };
 let clipAuto = false, floorY = 0;
 const clipArr = [];
 function applyClipToMaterials() {
-  const want = clipArr, mats = new Set([hiMat, ghostMat, groundMat, stencilMat]);
+  const want = clipArr, mats = new Set([hiMat, xMat, ghostMat, groundMat, stencilMat]);
   matCache.forEach(m => mats.add(m));
   mats.forEach(m => { if ((m.clippingPlanes || []).length !== want.length) m.needsUpdate = true; m.clippingPlanes = want; });
 }
@@ -785,6 +872,122 @@ document.querySelectorAll("#sectBox [data-ax]").forEach(b => b.addEventListener(
   document.querySelectorAll("#sectBox [data-ax]").forEach(x => x.classList.toggle("on", x === b)); updateClip();
 }));
 
+/* ---------- vistas guardadas ---------- */
+let savedViews = [];
+const viewsKey = () => "visor-views:" + ($("#fileName").textContent || "");
+function loadSavedViews() { try { savedViews = JSON.parse(localStorage.getItem(viewsKey()) || "[]") || []; } catch (e) { savedViews = []; } }
+function persistViews() { try { localStorage.setItem(viewsKey(), JSON.stringify(savedViews)); } catch (e) {} }
+function captureView(name) {
+  return { name, pos: camera.position.toArray(), tgt: controls.target.toArray(), roof: roofHidden, col: colorMode,
+    hid: [...classHidden], eh: [...elemHidden], iso: isolated ? [...isolated] : null,
+    clip: { on: clip.on, axis: clip.axis, flip: clip.flip, t: clip.t } };
+}
+function applySavedView(v) {
+  classHidden.clear(); v.hid.forEach(c => classHidden.add(c));
+  elemHidden.clear(); (v.eh || []).forEach(e => elemHidden.add(e));
+  treeHidden.clear(); isolated = v.iso ? new Set(v.iso) : null; roofAuto = false;
+  colorMode = v.col || colorMode; applyLook();
+  setRoof(!!v.roof);
+  clipAuto = false; clip.axis = v.clip.axis; clip.flip = v.clip.flip; clip.t = v.clip.t;
+  $("#sectRange").value = Math.round(clip.t * 100); setPressed("#sectFlip", clip.flip);
+  document.querySelectorAll("#sectBox [data-ax]").forEach(b => b.classList.toggle("on", b.dataset.ax === clip.axis));
+  setClipOn(!!v.clip.on);
+  document.querySelectorAll("#gViews .btn").forEach(b => b.classList.remove("on"));
+  flyTo(new THREE.Vector3(...v.pos), new THREE.Vector3(...v.tgt), 800);
+  if ($("#colorPop").classList.contains("show")) renderColorPop();
+}
+function renderViewsPop() {
+  $("#viewsPop").innerHTML = '<div class="ttl">Vistas guardadas</div><div class="vlist">' +
+    (savedViews.length ? savedViews.map((v, i) => '<div class="vr"><button class="btn go" type="button" data-go="' + i + '">' + esc(v.name) + '</button><button class="btn" type="button" data-del="' + i + '" aria-label="Borrar ' + esc(v.name) + '">✕</button></div>').join("") : '<div class="sum" style="border:0;padding:4px 0">Aún no hay vistas.</div>') +
+    '</div><div class="vlist"><input type="text" id="vName" placeholder="Nombre de la vista" aria-label="Nombre de la vista"><button class="btn" type="button" id="vSave">Guardar vista actual</button></div>' +
+    '<div class="sum" style="border:0">Guarda cámara, corte, capas, color y aislamiento.</div>';
+}
+$("#viewsPop").addEventListener("click", e => {
+  const go = e.target.closest("[data-go]"), del = e.target.closest("[data-del]");
+  if (go) applySavedView(savedViews[Number(go.dataset.go)]);
+  else if (del) { savedViews.splice(Number(del.dataset.del), 1); persistViews(); renderViewsPop(); }
+  else if (e.target.id === "vSave") {
+    const nm = ($("#vName").value.trim() || "Vista " + (savedViews.length + 1)).slice(0, 40);
+    savedViews.push(captureView(nm)); persistViews(); renderViewsPop();
+  }
+});
+$("#viewsPop").addEventListener("keydown", e => { if (e.key === "Enter" && e.target.id === "vName") $("#vSave").click(); });
+function setViewsPop(on) { $("#viewsPop").classList.toggle("show", on); $("#bViews").classList.toggle("on", on); $("#bViews").setAttribute("aria-expanded", String(on)); if (on) renderViewsPop(); }
+$("#bViews").addEventListener("click", () => { if (!meshes.length) return; const on = !$("#viewsPop").classList.contains("show"); setPop(false); setLayersPop(false); setViewsPop(on); });
+["#bColor", "#bLayers"].forEach(q => $(q).addEventListener("click", () => setViewsPop(false)));
+document.addEventListener("pointerdown", e => { if (!e.target.closest("#viewsPop,#bViews")) setViewsPop(false); });
+
+/* ---------- estructura espacial (Sitio → Edificio → Piso → Elemento) ---------- */
+let tree = null, listMode = "cls";
+const nodeById = new Map(), openNodes = new Set(), treeHidden = new Set();
+let isoNode = null;
+const NODE_ES = { IFCPROJECT: "Proyecto", IFCSITE: "Sitio", IFCBUILDING: "Edificio", IFCBUILDINGSTOREY: "Piso" };
+const SPATIAL = /^IFC(SITE|BUILDING|BUILDINGSTOREY|FACILITY|FACILITYPART|BRIDGE|ROAD|RAILWAY|MARINEFACILITY|SPATIALZONE)/;
+function buildSpatial() {
+  tree = null; nodeById.clear(); openNodes.clear(); treeHidden.clear(); isoNode = null;
+  try {
+    const idsOf = t => { const a = api.GetLineIDsWithType(modelID, t), o = []; for (let i = 0; i < a.size(); i++) o.push(a.get(i)); return o; };
+    const kids = new Map(), cont = new Map();
+    for (const id of [...idsOf(WebIFC.IFCRELAGGREGATES), ...idsOf(WebIFC.IFCRELNESTS)]) {
+      const l = api.GetLine(modelID, id, false), p = l.RelatingObject.value;
+      if (!kids.has(p)) kids.set(p, []); kids.get(p).push(...l.RelatedObjects.map(x => x.value));
+    }
+    for (const id of idsOf(WebIFC.IFCRELCONTAINEDINSPATIALSTRUCTURE)) {
+      const l = api.GetLine(modelID, id, false), p = l.RelatingStructure.value;
+      if (!cont.has(p)) cont.set(p, []); cont.get(p).push(...l.RelatedElements.map(x => x.value));
+    }
+    const assigned = new Set();
+    const mk = id => {
+      const l = api.GetLine(modelID, id, false), type = api.GetNameFromTypeCode(api.GetLineType(modelID, id)).toUpperCase();
+      const nm = (l.LongName && l.LongName.value) || (l.Name && l.Name.value) || "";
+      const n = { id, type, label: nm || NODE_ES[type] || pretty(type), sub: (NODE_ES[type] || pretty(type)) + (l.Elevation && l.Elevation.value != null ? " · cota " + fmtN(Number(l.Elevation.value)) + " m" : ""),
+        elev: l.Elevation && l.Elevation.value != null ? Number(l.Elevation.value) : null, children: [], elements: [], all: [] };
+      const collect = e => { if (assigned.has(e)) return; if (byEid.has(e)) { n.elements.push(e); assigned.add(e); } for (const c of kids.get(e) || []) collect(c); };
+      for (const e of cont.get(id) || []) collect(e);
+      for (const c of kids.get(id) || []) {
+        let ct = ""; try { ct = api.GetNameFromTypeCode(api.GetLineType(modelID, c)).toUpperCase(); } catch (e) {}
+        if (SPATIAL.test(ct)) n.children.push(mk(c)); else collect(c);
+      }
+      n.children.sort((a, b) => (a.elev ?? 0) - (b.elev ?? 0));
+      n.all = [...n.elements]; n.children.forEach(c => n.all.push(...c.all));
+      nodeById.set(id, n); return n;
+    };
+    const proj = idsOf(WebIFC.IFCPROJECT)[0];
+    if (proj === undefined) return;
+    tree = mk(proj);
+    const rest = [...byEid.keys()].filter(e => !assigned.has(e));
+    if (rest.length) { const n = { id: -1, type: "", label: "Sin asignar", sub: "Sin nivel en el modelo", elev: null, children: [], elements: rest, all: rest }; nodeById.set(-1, n); tree.children.push(n); tree.all.push(...rest); }
+    nodeById.forEach(n => { if (n.children.length) openNodes.add(n.id); });
+  } catch (e) { console.warn("Sin estructura espacial", e); tree = null; }
+  $("#segFloors").hidden = !tree || !tree.all.length;
+  if ($("#segFloors").hidden) listMode = "cls";
+  paintSeg();
+}
+function paintSeg() { $("#segCls").setAttribute("aria-pressed", String(listMode === "cls")); $("#segFloors").setAttribute("aria-pressed", String(listMode === "floors")); }
+const isoSvg = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg>';
+function nodeRows(n, depth) {
+  const open = openNodes.has(n.id), has = n.children.length || n.elements.length;
+  const allHid = n.all.length > 0 && n.all.every(e => treeHidden.has(e));
+  let h = '<div class="row" data-node="' + n.id + '" tabindex="0" role="button" aria-expanded="' + open + '" style="padding-left:' + (10 + depth * 14) + 'px"><span class="chev">' + (has ? (open ? "▾" : "▸") : "") + '</span>' +
+    '<div class="nm"><b>' + esc(n.label) + '</b><i>' + esc(n.sub) + '</i></div><span class="ct">' + n.all.length + '</span>' +
+    (n.all.length ? '<button class="eye sm" type="button" data-niso="' + n.id + '" aria-pressed="' + (isoNode === n.id) + '" aria-label="Aislar ' + esc(n.label) + '">' + isoSvg + '</button><button class="eye sm" type="button" data-neye="' + n.id + '" aria-pressed="' + !allHid + '" aria-label="' + (allHid ? "Mostrar " : "Ocultar ") + esc(n.label) + '">' + eyeSvg + '</button>' : "") + '</div>';
+  if (open) {
+    n.children.forEach(c => { h += nodeRows(c, depth + 1); });
+    h += n.elements.slice(0, 300).map(e => elemRow(e, depth + 1)).join("") + (n.elements.length > 300 ? '<div class="sum">Se muestran 300 de ' + n.elements.length + '.</div>' : "");
+  }
+  return h;
+}
+$("#segCls").addEventListener("click", () => { listMode = "cls"; paintSeg(); buildList(); });
+$("#segFloors").addEventListener("click", () => { listMode = "floors"; paintSeg(); buildList(); });
+function toggleNodeHidden(n) {
+  const allHid = n.all.every(e => treeHidden.has(e));
+  n.all.forEach(e => allHid ? treeHidden.delete(e) : treeHidden.add(e)); applyVisibility();
+}
+function toggleNodeIso(n) {
+  if (isoNode === n.id) { isoNode = null; isolated = null; } else { isoNode = n.id; isolated = new Set(n.all); }
+  refreshMaterials(); buildList(); renderProps(selected);
+}
+
 /* ---------- lista del modelo ---------- */
 const eyeSvg = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12Z"/><circle cx="12" cy="12" r="3"/></svg>';
 let openClass = null;
@@ -802,6 +1005,7 @@ function buildList() {
     html = hits.slice(0, 300).map(eid => elemRow(eid)).join("") || '<div class="empty">Ningún elemento coincide.</div>';
     if (hits.length > 300) html += '<div class="sum">Se muestran 300 de ' + hits.length + '. Afina la búsqueda.</div>';
   } else {
+    if (listMode === "floors" && tree) { $("#sum").textContent = byEid.size + " elementos · " + [...nodeById.values()].filter(n => n.type === "IFCBUILDINGSTOREY").length + " pisos"; list.innerHTML = nodeRows(tree, 0); listMarkSelected(); return; }
     $("#sum").textContent = byEid.size + " elementos · " + classes.size + " clases";
     const arr = [...classes.entries()].sort((a, b) => b[1].size - a[1].size);
     for (const [cn, set] of arr) {
@@ -815,12 +1019,17 @@ function buildList() {
 }
 function elemRow(eid, indent) {
   const o = names.get(eid), hid = elemHidden.has(eid);
-  return '<div class="row" data-eid="' + eid + '" tabindex="0" role="button" style="' + (indent ? "padding-left:28px;" : "") + '"><div class="nm"><b>' + esc(o.name || "(sin nombre)") + '</b><i>' + esc(o.cls) + " · #" + eid + (hid ? " · oculto" : "") + "</i></div></div>";
+  return '<div class="row" data-eid="' + eid + '" tabindex="0" role="button" style="' + (typeof indent === "number" ? "padding-left:" + (24 + indent * 14) + "px;" : indent ? "padding-left:28px;" : "") + '"><div class="nm"><b>' + esc(o.name || "(sin nombre)") + '</b><i>' + esc(o.cls) + " · #" + eid + (hid ? " · oculto" : "") + "</i></div></div>";
 }
 function listMarkSelected() {
   document.querySelectorAll("#list .row[data-eid]").forEach(r => { const on = Number(r.dataset.eid) === selected; r.style.background = on ? "color-mix(in srgb, var(--accent) 22%, transparent)" : ""; });
 }
 $("#list").addEventListener("click", e => {
+  const nEye = e.target.closest("[data-neye]"), nIso = e.target.closest("[data-niso]");
+  if (nEye) { e.stopPropagation(); toggleNodeHidden(nodeById.get(Number(nEye.dataset.neye))); return; }
+  if (nIso) { e.stopPropagation(); toggleNodeIso(nodeById.get(Number(nIso.dataset.niso))); return; }
+  const nRow = e.target.closest("[data-node]");
+  if (nRow) { const id = Number(nRow.dataset.node); openNodes.has(id) ? openNodes.delete(id) : openNodes.add(id); buildList(); return; }
   const eye = e.target.closest("[data-eye]");
   if (eye) { e.stopPropagation(); const c = eye.dataset.eye; classHidden.has(c) ? classHidden.delete(c) : classHidden.add(c); applyVisibility(); return; }
   const row = e.target.closest(".row"); if (!row) return;
@@ -841,7 +1050,7 @@ async function renderProps(eid) {
   const kv = (k, val) => val ? '<div class="kv"><span>' + esc(k) + "</span><b>" + esc(val) + "</b></div>" : "";
   const isHid = elemHidden.has(eid);
   const html = '<h3>' + esc(o.name || "(sin nombre)") + '</h3><div class="cls">' + esc((ES[o.cls] ? ES[o.cls] + " · " : "") + o.cls + " · #" + eid) + "</div>" +
-    '<div class="acts"><button class="btn" data-a="hide" type="button">' + (isHid ? "Mostrar" : "Ocultar") + '</button><button class="btn" data-a="iso" type="button">' + (isolated ? "Quitar aislamiento" : "Aislar") + '</button><button class="btn" data-a="zoom" type="button">Enfocar</button></div>' +
+    '<div class="acts"><button class="btn" data-a="hide" type="button">' + (isHid ? "Mostrar" : "Ocultar") + '</button><button class="btn" data-a="iso" type="button">' + (isolated ? "Quitar aislamiento" : "Aislar") + '</button><button class="btn" data-a="zoom" type="button">Enfocar</button><button class="btn" data-a="xray" type="button">' + (xray ? "Quitar rayos X" : "Rayos X") + '</button></div>' +
     kv("GlobalId", v("GlobalId")) + kv("Tag", v("Tag")) + kv("Tipo de objeto", v("ObjectType")) + kv("Descripción", v("Description")) + '<div id="psets"><div class="sum">Leyendo propiedades…</div></div>';
   body.innerHTML = html;
   try {
@@ -869,7 +1078,8 @@ $("#propsBody").addEventListener("click", e => {
   const b = e.target.closest("[data-a]"); if (!b || selected == null) return;
   const eid = selected;
   if (b.dataset.a === "hide") { elemHidden.has(eid) ? elemHidden.delete(eid) : elemHidden.add(eid); applyVisibility(); renderProps(eid); }
-  if (b.dataset.a === "iso") { isolated = isolated ? null : new Set([eid]); refreshMaterials(); renderProps(eid); if (isolated) focusElement(eid); }
+  if (b.dataset.a === "xray") { xray = !xray; setPressed("#bXray", xray); refreshMaterials(); renderProps(eid); }
+  if (b.dataset.a === "iso") { isoNode = null; isolated = isolated ? null : new Set([eid]); refreshMaterials(); renderProps(eid); if (isolated) focusElement(eid); }
   if (b.dataset.a === "zoom") focusElement(eid);
 });
 
@@ -899,34 +1109,86 @@ canvas.addEventListener("pointerup", e => {
   const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y), dt = performance.now() - down.t; down = null;
   if (moved > 6 || dt > 600 || e.button > 0) return;
   const hit = pick(e);
-  if (measuring) { if (hit) addPoint(hit.point); return; }
+  if (measuring) { if (mType === "box") { if (hit) { selectElement(hit.object.userData.eid, false); showBoxOf(hit.object.userData.eid); } } else if (hit) addPoint(hit.point); return; }
   selectElement(hit ? hit.object.userData.eid : null);
 });
-function clearMeasure() { mObjs.forEach(o => { aux.remove(o); o.geometry.dispose(); o.material.dispose(); }); mObjs = []; mPts = []; $("#mlabel").hidden = true; }
-function addPoint(p) {
-  if (mPts.length >= 2) clearMeasure();
-  mPts.push(p.clone());
-  const s = new THREE.Mesh(new THREE.SphereGeometry(R * 0.009, 12, 12), new THREE.MeshBasicMaterial({ color: 0xff5a00, depthTest: false }));
-  s.position.copy(p); s.renderOrder = 9; aux.add(s); mObjs.push(s);
-  if (mPts.length === 2) {
-    const l = new THREE.Line(new THREE.BufferGeometry().setFromPoints(mPts), new THREE.LineBasicMaterial({ color: 0xff5a00, depthTest: false }));
-    l.renderOrder = 9; aux.add(l); mObjs.push(l);
-  }
+const mid = new THREE.Vector3();
+let mType = "dist", mClosed = false, mText = "", mAnchor = new THREE.Vector3();
+const M_HINT = {
+  dist: "Toca dos puntos del modelo para medir la distancia",
+  ang: "Toca tres puntos: el segundo es el vértice del ángulo",
+  poly: "Toca puntos en sucesión para sumar longitudes; «Cerrar» da el perímetro",
+  box: "Toca una pieza para ver sus dimensiones y el volumen de su caja"
+};
+const HINT_DEFAULT = "Arrastra para girar · rueda o pellizco para acercar · toca una pieza para ver sus datos";
+function clearMeasure() {
+  mObjs.forEach(o => { aux.remove(o); o.geometry.dispose(); if (o.material) o.material.dispose(); });
+  mObjs = []; mPts = []; mClosed = false; mText = ""; $("#mlabel").hidden = true; $("#mClose").hidden = mType !== "poly";
 }
+const mMat = () => new THREE.LineBasicMaterial({ color: 0xff5a00, depthTest: false });
+function rebuildMeasure() {
+  mObjs.forEach(o => { aux.remove(o); o.geometry.dispose(); o.material.dispose(); }); mObjs = [];
+  mPts.forEach(p => {
+    const s = new THREE.Mesh(new THREE.SphereGeometry(R * 0.009, 12, 12), new THREE.MeshBasicMaterial({ color: 0xff5a00, depthTest: false }));
+    s.position.copy(p); s.renderOrder = 9; aux.add(s); mObjs.push(s);
+  });
+  if (mPts.length >= 2) {
+    const pts = mClosed ? [...mPts, mPts[0]] : mPts;
+    const l = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), mMat()); l.renderOrder = 9; aux.add(l); mObjs.push(l);
+  }
+  const A = mPts[0], B = mPts[1], C = mPts[2];
+  if (mType === "dist" && mPts.length === 2) {
+    const hz = Math.hypot(B.x - A.x, B.z - A.z), vt = Math.abs(B.y - A.y);
+    mText = fmtN(A.distanceTo(B)) + " m\nH " + fmtN(hz) + " · V " + fmtN(vt); mAnchor.copy(A).add(B).multiplyScalar(0.5);
+  } else if (mType === "ang" && mPts.length === 3) {
+    const u = A.clone().sub(B).normalize(), v = C.clone().sub(B).normalize();
+    mText = fmtN(THREE.MathUtils.radToDeg(u.angleTo(v)), 1) + "°"; mAnchor.copy(B);
+  } else if (mType === "poly" && mPts.length >= 2) {
+    let len = 0; for (let i = 1; i < mPts.length; i++) len += mPts[i].distanceTo(mPts[i - 1]);
+    if (mClosed) len += mPts[mPts.length - 1].distanceTo(mPts[0]);
+    mText = (mClosed ? "Perímetro " : "Longitud ") + fmtN(len) + " m\n" + mPts.length + " puntos"; mAnchor.copy(mPts[mPts.length - 1]);
+  } else mText = "";
+  if (!mText) $("#mlabel").hidden = true;
+}
+function addPoint(p) {
+  const max = mType === "dist" ? 2 : mType === "ang" ? 3 : 1e9;
+  if (mClosed || mPts.length >= max) clearMeasure();
+  mPts.push(p.clone()); rebuildMeasure();
+}
+function showBoxOf(eid) {
+  clearMeasure();
+  const b = new THREE.Box3(); (byEid.get(eid) || []).forEach(m => b.expandByObject(m));
+  if (b.isEmpty()) return;
+  const h = new THREE.Box3Helper(b, 0xff5a00); h.material.depthTest = false; h.renderOrder = 9; aux.add(h); mObjs.push(h);
+  const sz = b.getSize(new THREE.Vector3());
+  mText = "L " + fmtN(sz.x) + " × A " + fmtN(sz.z) + " × H " + fmtN(sz.y) + " m\nCaja: " + fmtN(sz.x * sz.y * sz.z, 3) + " m³";
+  mAnchor.set((b.min.x + b.max.x) / 2, b.max.y, (b.min.z + b.max.z) / 2);
+}
+function setMType(t) {
+  mType = t; clearMeasure();
+  document.querySelectorAll("#mBar [data-mt]").forEach(b => b.classList.toggle("on", b.dataset.mt === t));
+  $("#mClose").hidden = t !== "poly";
+  if (measuring) $("#hint").textContent = M_HINT[t];
+  if (t === "box" && selected != null) showBoxOf(selected);
+}
+$("#mBar").addEventListener("click", e => {
+  const b = e.target.closest("[data-mt]"); if (b) { setMType(b.dataset.mt); return; }
+  if (e.target.id === "mClear") clearMeasure();
+  if (e.target.id === "mClose" && mPts.length >= 3) { mClosed = true; rebuildMeasure(); }
+});
 $("#bMeasure").addEventListener("click", () => {
   measuring = !measuring; setPressed("#bMeasure", measuring); canvas.classList.toggle("measuring", measuring);
-  $("#hint").textContent = measuring ? "Toca dos puntos del modelo para medir la distancia" : "Arrastra para girar · rueda o pellizco para acercar · toca una pieza para ver sus datos";
+  $("#mBar").hidden = !measuring;
+  $("#hint").textContent = measuring ? M_HINT[mType] : HINT_DEFAULT;
   if (!measuring) clearMeasure();
 });
-const mid = new THREE.Vector3();
 function placeLabel() {
   const lb = $("#mlabel");
-  if (mPts.length < 2) { lb.hidden = true; return; }
-  const d = mPts[0].distanceTo(mPts[1]), hz = Math.hypot(mPts[1].x - mPts[0].x, mPts[1].z - mPts[0].z), vt = Math.abs(mPts[1].y - mPts[0].y);
-  mid.copy(mPts[0]).add(mPts[1]).multiplyScalar(0.5).project(camera);
+  if (!mText) { lb.hidden = true; return; }
+  mid.copy(mAnchor).project(camera);
   const w = stage.clientWidth, h = stage.clientHeight;
   lb.hidden = mid.z > 1; lb.style.left = ((mid.x + 1) / 2 * w) + "px"; lb.style.top = ((1 - mid.y) / 2 * h) + "px";
-  lb.textContent = fmtN(d) + " m  ·  H " + fmtN(hz) + "  V " + fmtN(vt);
+  lb.textContent = mText;
 }
 
 /* ---------- carga de archivos ---------- */

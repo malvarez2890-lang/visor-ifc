@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://malvarez2890-lang.github.io/visor-ifc/sitemap.xml
