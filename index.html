@@ -351,7 +351,7 @@ function clearModel() {
   root.clear(); matCache.forEach(m => m.dispose()); matCache.clear();
   if (modelID >= 0) { try { api.CloseModel(modelID); } catch (e) {} modelID = -1; }
   meshes = []; byEid = new Map(); classes = new Map(); names = new Map(); centers = new Map(); roofSet = new Set();
-  classHidden.clear(); elemHidden.clear(); isolated = null; roofHidden = false; roofAuto = false; explodeK = 0; explodeTarget = 0;
+  classHidden.clear(); elemHidden.clear(); isolated = null; roofHidden = false; roofAuto = false; clipAuto = false; explodeK = 0; explodeTarget = 0;
   roomItems = []; $("#rooms").innerHTML = ""; roomsOn = false; setPressed("#bRooms", false); $("#bRooms").hidden = true; $("#rooms").hidden = true;
   setPressed("#bRoof", false); setPressed("#bExplode", false); $("#bExplode").textContent = "Explotar"; $("#bRoof").textContent = "Ocultar cubierta";
 }
@@ -466,6 +466,10 @@ async function loadBuffer(buf, label) {
     const sz = box.getSize(new THREE.Vector3()); R = Math.max(sz.length() / 2, 0.5); H = Math.max(sz.y, 0.5);
     /* altura de cada elemento: separa cubierta, pisos y fundaciones para ocultar la cubierta y explotar */
     for (const [eid, ms] of byEid) { const b = new THREE.Box3(); ms.forEach(m => b.expandByObject(m)); centers.set(eid, b.getCenter(new THREE.Vector3())); }
+    floorY = box.min.y;
+    { let low = null;
+      for (const [eid, o] of names) if (o.cls === "IfcSlab" && (low === null || centers.get(eid).y < centers.get(low).y)) low = eid;
+      if (low !== null) { const b = new THREE.Box3(); byEid.get(low).forEach(m => b.expandByObject(m)); floorY = b.max.y; } }
     const topCut = box.min.y + H * 0.72;
     for (const [eid, o] of names) {
       const y = centers.get(eid)?.y ?? 0;
@@ -542,7 +546,7 @@ $("#bColor").addEventListener("click", () => { if (!meshes.length) return; const
 document.addEventListener("pointerdown", e => { if (!e.target.closest("#colorPop,#bColor")) setPop(false); if (!e.target.closest("#layersPop,#bLayers")) setLayersPop(false); });
 
 /* ---------- vistas ---------- */
-const DIRS = { iso: [1.25, 0.95, 1.25], top: [0.0001, 2.2, 0.0001], front: [0, 0.35, 1.9], side: [1.9, 0.35, 0], back: [0, 0.35, -1.9], left: [-1.9, 0.35, 0], bottom: [0.0001, -2.2, 0.0001] };
+const DIRS = { iso: [1.25, 0.95, 1.25], top: [0, 2.2, -0.0001], front: [0, 0.35, 1.9], side: [1.9, 0.35, 0], back: [0, 0.35, -1.9], left: [-1.9, 0.35, 0], bottom: [0.0001, -2.2, 0.0001] };
 let anim = null, viewKey = "iso";
 function setView(v, instant) {
   viewKey = v;
@@ -554,9 +558,17 @@ function setView(v, instant) {
   document.querySelectorAll("#gViews .btn").forEach(b => b.classList.toggle("on", b.dataset.v === v));
 }
 function viewHooks(k) {
-  if (k === "top") { if (!roofHidden && roofSet.size) { setRoof(true); roofAuto = true; } }
-  else if (roofAuto && !roomsOn) { setRoof(false); roofAuto = false; }
+  if (k === "top") {
+    if (clip.on) return;
+    clipAuto = true; clip.axis = "y"; clip.flip = false;
+    clip.t = Math.min(1, Math.max(0, (floorY + 1 - box.min.y) / Math.max(box.max.y - box.min.y, 1e-6)));
+    $("#sectRange").value = Math.round(clip.t * 100); setPressed("#sectFlip", false);
+    document.querySelectorAll("#sectBox [data-ax]").forEach(b => b.classList.toggle("on", b.dataset.ax === "y"));
+    setClipOn(true);
+  } else if (clipAuto) { clipAuto = false; setupSection(); }
+  if (k !== "top" && roofAuto && !roomsOn) { setRoof(false); roofAuto = false; }
 }
+["#sectBox", "#bSection"].forEach(q => $(q).addEventListener("pointerdown", () => { clipAuto = false; }));
 document.querySelectorAll("#gViews .btn").forEach(b => b.addEventListener("click", () => { if (!meshes.length) return; setView(b.dataset.v); viewHooks(b.dataset.v); }));
 controls.addEventListener("start", () => { anim = null; spin = null; document.querySelectorAll("#gViews .btn").forEach(b => b.classList.remove("on")); });
 
@@ -723,6 +735,7 @@ function applyExplode(e) {
 
 /* ---------- corte con relleno negro (poché) ---------- */
 const clip = { on: false, axis: "y", flip: false, t: 1 };
+let clipAuto = false, floorY = 0;
 const clipArr = [];
 function applyClipToMaterials() {
   const want = clipArr, mats = new Set([hiMat, ghostMat, groundMat, stencilMat]);
