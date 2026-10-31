@@ -548,15 +548,22 @@ document.addEventListener("pointerdown", e => { if (!e.target.closest("#colorPop
 /* ---------- vistas ---------- */
 const DIRS = { iso: [1.25, 0.95, 1.25], top: [0, 2.2, -0.0001], front: [0, 0.35, 1.9], side: [1.9, 0.35, 0], back: [0, 0.35, -1.9], left: [-1.9, 0.35, 0], bottom: [0.0001, -2.2, 0.0001] };
 let anim = null, viewKey = "iso";
+function flyTo(pos, tgt, dur = 650) {
+  const f = new THREE.Spherical().setFromVector3(camera.position.clone().sub(controls.target));
+  const t = new THREE.Spherical().setFromVector3(pos.clone().sub(tgt));
+  const dth = ((t.theta - f.theta + Math.PI) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI) - Math.PI; // giro por el camino corto
+  anim = { f, t, dth, tFrom: controls.target.clone(), tTo: tgt.clone(), t0: performance.now(), dur };
+}
 function setView(v, instant) {
   viewKey = v;
   const d = new THREE.Vector3(...DIRS[v]).normalize();
   const dist = R / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * (camera.aspect < 1 ? 1.2 / camera.aspect : 1.3) * scaleNow;
   const to = center.clone().addScaledVector(d, dist);
   if (instant) { camera.position.copy(to); controls.target.copy(center); controls.update(); }
-  else anim = { from: camera.position.clone(), to, tFrom: controls.target.clone(), tTo: center.clone(), t0: performance.now(), dur: 650 };
+  else flyTo(to, center.clone());
   document.querySelectorAll("#gViews .btn").forEach(b => b.classList.toggle("on", b.dataset.v === v));
 }
+function showRoofAgain() { if (roomsOn) setRooms(false); if (roofHidden) { setRoof(false); roofAuto = false; } }
 function viewHooks(k) {
   if (k === "top") {
     if (clip.on) return;
@@ -569,7 +576,7 @@ function viewHooks(k) {
   if (k !== "top" && roofAuto && !roomsOn) { setRoof(false); roofAuto = false; }
 }
 ["#sectBox", "#bSection"].forEach(q => $(q).addEventListener("pointerdown", () => { clipAuto = false; }));
-document.querySelectorAll("#gViews .btn").forEach(b => b.addEventListener("click", () => { if (!meshes.length) return; setView(b.dataset.v); viewHooks(b.dataset.v); }));
+document.querySelectorAll("#gViews .btn").forEach(b => b.addEventListener("click", () => { if (!meshes.length) return; setView(b.dataset.v); viewHooks(b.dataset.v); if (b.dataset.v === "iso") showRoofAgain(); }));
 controls.addEventListener("start", () => { anim = null; spin = null; document.querySelectorAll("#gViews .btn").forEach(b => b.classList.remove("on")); });
 
 
@@ -642,7 +649,7 @@ function snapDir(d) {
   viewHooks("iso");
   if (Math.abs(d.x) < 1e-3 && Math.abs(d.z) < 1e-3) d.z = 1e-4; // vista inferior: evita el eje vertical exacto
   const dist = Math.max(camera.position.distanceTo(controls.target), R * 1.2);
-  anim = { from: camera.position.clone(), to: center.clone().addScaledVector(d, dist), tFrom: controls.target.clone(), tTo: center.clone(), t0: performance.now(), dur: 650 };
+  flyTo(center.clone().addScaledVector(d, dist), center.clone());
 }
 function spinView(ang) { if (meshes.length) { anim = null; spin = { t0: performance.now(), ang, last: 0, dur: 450 }; } }
 let cubeDown = null, cubeHover = -1;
@@ -667,7 +674,7 @@ vcCv.addEventListener("pointermove", e => {
 vcCv.addEventListener("pointerleave", () => { cubeHover = -1; cubeMats.forEach(m => m.color.set(0xffffff)); spots.forEach(m => { m.material.color.set(0x6b7785); m.material.opacity = 0.22; }); });
 $("#vSpinL").addEventListener("click", () => { viewHooks("iso"); spinView(Math.PI / 2); });
 $("#vSpinR").addEventListener("click", () => { viewHooks("iso"); spinView(-Math.PI / 2); });
-$("#vHome").addEventListener("click", () => { if (!meshes.length) return; setView("iso"); viewHooks("iso"); });
+$("#vHome").addEventListener("click", () => { if (!meshes.length) return; setView("iso"); viewHooks("iso"); showRoofAgain(); });
 const cubeDir = new THREE.Vector3();
 function renderCube() {
   cubeDir.copy(camera.position).sub(controls.target).normalize().multiplyScalar(3.6);
@@ -695,7 +702,7 @@ function focusElement(eid) {
   const c = b.getCenter(new THREE.Vector3()), r = Math.max(b.getSize(new THREE.Vector3()).length() / 2, R * 0.04);
   const dir = camera.position.clone().sub(controls.target).normalize();
   const dist = r / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * 1.8;
-  controls.target.copy(c); camera.position.copy(c).addScaledVector(dir, dist); controls.update();
+  flyTo(c.clone().addScaledVector(dir, dist), c, 500);
 }
 function setRoof(hide) {
   roofHidden = hide; setPressed("#bRoof", hide); $("#bRoof").textContent = hide ? "Mostrar cubierta" : "Ocultar cubierta"; applyVisibility();
@@ -943,7 +950,8 @@ function loop() {
   requestAnimationFrame(loop);
   if (anim) {
     const k = Math.min(1, (performance.now() - anim.t0) / anim.dur), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
-    camera.position.lerpVectors(anim.from, anim.to, e); controls.target.lerpVectors(anim.tFrom, anim.tTo, e);
+    const a = anim, sp = new THREE.Spherical(a.f.radius + (a.t.radius - a.f.radius) * e, a.f.phi + (a.t.phi - a.f.phi) * e, a.f.theta + a.dth * e);
+    controls.target.lerpVectors(a.tFrom, a.tTo, e); camera.position.setFromSpherical(sp).add(controls.target);
     if (k >= 1) anim = null;
   }
   if (spin) {
