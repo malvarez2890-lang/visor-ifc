@@ -221,8 +221,8 @@ aside{width:340px;flex:none;border:2px solid var(--ink);background:var(--panel);
       <div class="pop" id="viewsPop" role="menu"></div>
       <div class="sect" id="sectBox">
         <div class="srow" data-ax="x"><button class="btn" data-on type="button" aria-pressed="false">Eje X</button><input type="range" min="0" max="100" value="100" aria-label="Posición del corte en el eje X"><span class="sv">sin corte</span><button class="btn" data-flip type="button" aria-pressed="false">Invertir</button></div>
-        <div class="srow" data-ax="y"><button class="btn" data-on type="button" aria-pressed="false">Eje Y</button><input type="range" min="0" max="100" value="100" aria-label="Posición del corte en el eje Y"><span class="sv">sin corte</span><button class="btn" data-flip type="button" aria-pressed="false">Invertir</button></div>
-        <div class="srow" data-ax="z"><button class="btn" data-on type="button" aria-pressed="false">Eje Z</button><input type="range" min="0" max="100" value="100" aria-label="Posición del corte en el eje Z"><span class="sv">sin corte</span><button class="btn" data-flip type="button" aria-pressed="false">Invertir</button></div>
+        <div class="srow" data-ax="z"><button class="btn" data-on type="button" aria-pressed="false">Eje Y</button><input type="range" min="0" max="100" value="100" aria-label="Posición del corte en el eje Y"><span class="sv">sin corte</span><button class="btn" data-flip type="button" aria-pressed="false">Invertir</button></div>
+        <div class="srow" data-ax="y"><button class="btn" data-on type="button" aria-pressed="false">Eje Z</button><input type="range" min="0" max="100" value="100" aria-label="Posición del corte en el eje Z"><span class="sv">sin corte</span><button class="btn" data-flip type="button" aria-pressed="false">Invertir</button></div>
         <div class="srow"><button class="btn" id="sectClear" type="button">Quitar cortes</button></div>
       </div>
       <div class="mbar" id="mBar" hidden>
@@ -834,13 +834,17 @@ let clipAuto = false, floorY = 0;
 const clipArr = [];
 const clipPlanes = { x: new THREE.Plane(new THREE.Vector3(-1, 0, 0), 0), y: new THREE.Plane(new THREE.Vector3(0, -1, 0), 0), z: new THREE.Plane(new THREE.Vector3(0, 0, -1), 0) };
 const AX = { x: new THREE.Vector3(-1, 0, 0), y: new THREE.Vector3(0, -1, 0), z: new THREE.Vector3(0, 0, -1) };
-const stencilMat = {}, capMesh = {}, caps = { x: new Map(), y: new Map(), z: new Map() };
+const clearer = {}, stencilMat = {}, capMesh = {}, caps = { x: new Map(), y: new Map(), z: new Map() };
 AXES.forEach((a, i) => {
   stencilMat[a] = new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: false, depthTest: false, side: THREE.DoubleSide,
     stencilWrite: true, stencilFunc: THREE.AlwaysStencilFunc, stencilFail: THREE.InvertStencilOp, stencilZFail: THREE.InvertStencilOp, stencilZPass: THREE.InvertStencilOp });
   const cm = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.DoubleSide,
     stencilWrite: true, stencilRef: 0, stencilFunc: THREE.NotEqualStencilFunc, stencilFail: THREE.ReplaceStencilOp, stencilZFail: THREE.ReplaceStencilOp, stencilZPass: THREE.ReplaceStencilOp }));
   cm.renderOrder = 11 + i * 2; cm.visible = false; scene.add(cm); capMesh[a] = cm;
+  // limpia la plantilla antes de cada eje: los píxeles que la tapa de un eje no pudo borrar (recortada por otro plano) dejaban residuos negros
+  const cg = new THREE.BufferGeometry(); cg.setAttribute("position", new THREE.Float32BufferAttribute(new Float32Array(9), 3));
+  const cl = new THREE.Mesh(cg, new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: false, depthTest: false }));
+  cl.frustumCulled = false; cl.renderOrder = 9.5 + i * 2; cl.visible = false; cl.onBeforeRender = r => r.clearStencil(); scene.add(cl); clearer[a] = cl;
 });
 function applyClipToMaterials() {
   const want = clipArr, mats = new Set([hiMat, xMat, ghostMat, groundMat]);
@@ -860,6 +864,7 @@ function updateClip() {
     document.querySelector('#sectBox [data-ax="' + a + '"] .sv').textContent = active ? fmtN(v - lo) + " m" : "sin corte";
     if (active) { clipPlanes[a].normal.copy(AX[a]).multiplyScalar(s); clipPlanes[a].constant = s * v; clipArr.push(clipPlanes[a]); act.push(a); }
   });
+  AXES.forEach(a => { clearer[a].visible = act.includes(a); });
   AXES.forEach(a => { if (!act.includes(a)) { caps[a].forEach(tw => scene.remove(tw)); caps[a].clear(); capMesh[a].visible = false; } });
   applyClipToMaterials();
   act.forEach((a, k) => {
