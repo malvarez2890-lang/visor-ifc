@@ -1313,6 +1313,7 @@ function setVMenu(on) {
   if (on) placePop("#vmenu", "#bViewMenu");
   $("#vmenu").classList.toggle("show", on); $("#bViewMenu").classList.toggle("on", on); $("#bViewMenu").setAttribute("aria-expanded", String(on)); }
 const PANELS = { bColor: () => setPop(false), bLayers: () => setLayersPop(false), bViews: () => setViewsPop(false), bViewMenu: () => setVMenu(false),
+  setBtn: () => { $("#setPop").classList.remove("show"); $("#setBtn").setAttribute("aria-expanded", "false"); },
   bSection: () => { if ($("#sectBox").classList.contains("show")) showSect(false); }, bMeasure: () => { if (measuring) $("#bMeasure").click(); } };
 Object.keys(PANELS).forEach(id => $("#" + id).addEventListener("click", () => Object.keys(PANELS).forEach(o => { if (o !== id) PANELS[o](); }), true));
 $("#bViewMenu").addEventListener("click", () => { if (meshes.length) setVMenu(!$("#vmenu").classList.contains("show")); });
