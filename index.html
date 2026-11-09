@@ -85,7 +85,10 @@ main{flex:1;min-height:0;display:flex;gap:12px}
 .vcube .rw button{width:30px;height:26px;border:2px solid var(--ink);background:var(--panel);color:var(--ink);font-size:16px;line-height:1;cursor:pointer;padding:0;touch-action:manipulation}
 .vcube .rw button:hover{background:var(--ink);color:var(--panel)}
 #stage.empty .vcube,#stage.empty .rooms{display:none}
-#cv{cursor:grab}#cv:active{cursor:grabbing}#cv.measuring{cursor:crosshair}
+#cv,#cv[data-nav=sel]{cursor:default}
+#cv[data-nav=pan]{cursor:grab}#cv[data-nav=pan]:active{cursor:grabbing}
+#cv[data-nav=orb]{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='4.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath id='p' d='M20 12a8 8 0 11-3-6.2M20 3v4.5h-4.5'/%3E%3C/svg%3E") 14 14,alias}
+#cv.measuring{cursor:crosshair !important}
 .rooms{position:absolute;inset:0;z-index:2;pointer-events:none;overflow:hidden}
 .rooms[hidden]{display:none}
 .room{position:absolute;left:0;top:0;background:var(--panel);border:2px solid var(--ink);padding:3px 8px 4px;text-align:center;line-height:1.15;white-space:nowrap}
@@ -423,15 +426,15 @@ aside{width:clamp(290px,24vw,350px);border:1px solid var(--line);
 #planLevel .btn{min-height:30px;font-weight:550;font-size:11.5px}
 #planLevel[hidden]{display:none}
 /* Barra de herramientas con iconos */
-.tools #toolbar{flex-wrap:wrap;row-gap:4px;padding:6px 8px;gap:0;align-items:stretch}
+.tools #toolbar{flex-wrap:wrap;row-gap:6px;padding:7px 10px;gap:4px;align-items:stretch}
 .tb{flex-direction:column;justify-content:center;gap:4px;min-width:44px;min-height:56px;padding:7px 3px 6px;font:600 10.5px/1.15 var(--f-body);text-align:center;white-space:normal}
 .tb .ic{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
 .tb .lbl{white-space:nowrap}
 .tb.dd .lbl::after{content:"▾";font-size:9px;margin-left:2px}
 .tools .tb[hidden]{display:none}
-.tg{display:flex;flex-direction:column;align-items:center;gap:2px;padding-right:6px;margin-right:2px;border-right:1px solid var(--line)}
-.tgi{display:flex;gap:3px}
-.tools .grp .tb{padding:7px 4px 6px}
+.tg{display:flex;flex-direction:column;align-items:center;gap:2px;padding-right:10px;margin-right:4px;border-right:1px solid var(--line)}
+.tgi{display:flex;gap:4px}
+.tools .grp .tb{padding:7px 5px 6px}
 .tools .grp .tb.nav{padding:8px}
 .tb.nav{min-width:40px;min-height:40px;padding:8px;border-radius:10px}
 .tb.nav .ic{width:22px;height:22px}
@@ -472,7 +475,7 @@ aside{width:clamp(290px,24vw,350px);border:1px solid var(--line);
           <button class="btn tb dd" id="bSection" type="button" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true" class="ic"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M4 12l8 4.5 8-4.5" stroke-dasharray="2.5 2"/></svg><span class="lbl">Secciones</span></button>
           <button class="btn tb dd" id="bMeasure" type="button" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true" class="ic"><path d="M3 17L17 3l4 4L7 21z"/><path d="M7 13l2 2M10 10l2 2M13 7l2 2"/></svg><span class="lbl">Medir</span></button>
           <button class="btn tb dd" id="bLayers" type="button" aria-haspopup="true" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true" class="ic"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 12.5l9 5 9-5M3 17l9 5 9-5"/></svg><span class="lbl">Capas</span></button>
-          <button class="btn tb dd" id="bColor" type="button" aria-haspopup="true" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true" class="ic"><path d="M12 3s6 6.5 6 11a6 6 0 01-12 0c0-4.5 6-11 6-11z"/></svg><span class="lbl">Color</span></button>
+          <button class="btn tb dd" id="bColor" type="button" aria-haspopup="true" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true" class="ic"><path d="M12 3s6 6.5 6 11a6 6 0 01-12 0c0-4.5 6-11 6-11z"/></svg><span class="lbl">Estilo</span></button>
           <button class="btn tb" id="bFit" type="button" ><svg viewBox="0 0 24 24" aria-hidden="true" class="ic"><path d="M4 9V5a1 1 0 011-1h4M15 4h4a1 1 0 011 1v4M20 15v4a1 1 0 01-1 1h-4M9 20H5a1 1 0 01-1-1v-4"/><circle cx="12" cy="12" r="2.5"/></svg><span class="lbl">Ajustar</span></button>
           <button class="btn tb" id="bExplode" type="button" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true" class="ic"><path d="M12 2.5l3.5 2v4L12 10.5 8.5 8.5v-4zM6.5 12.5L10 14.5v4L6.5 20.5 3 18.5v-4zM17.5 12.5l3.5 2v4l-3.5 2-3.5-2v-4z"/></svg><span class="lbl">Explotar</span></button>
           <button class="btn tb" id="bXray" type="button" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true" class="ic"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><span class="lbl">Rayos X</span></button>
@@ -632,7 +635,7 @@ function applyMouse() {
   controls.mouseButtons = { LEFT: navMode === "pan" ? THREE.MOUSE.PAN : navMode === "orb" ? THREE.MOUSE.ROTATE : MOUSE_ACT[mouseCfg.L], MIDDLE: MOUSE_ACT[mouseCfg.M], RIGHT: MOUSE_ACT[mouseCfg.R] };
   controls.zoomToCursor = !!mouseCfg.cursor;
   $("#mPreset").value = mouseCfg.preset; $("#mL").value = mouseCfg.L; $("#mM").value = mouseCfg.M; $("#mR").value = mouseCfg.R; $("#mCur").checked = !!mouseCfg.cursor;
-  canvas.style.cursor = navMode === "pan" ? "move" : mouseCfg.L === "rotate" || mouseCfg.L === "pan" || navMode === "orb" ? "" : "default";
+  canvas.style.cursor = ""; canvas.dataset.nav = navMode;
   try { localStorage.setItem("visor-mouse", JSON.stringify(mouseCfg)); } catch (e) {}
 }
 $("#mPreset").addEventListener("change", e => { const p = MOUSE_PRESETS[e.target.value]; if (p) { mouseCfg = { preset: e.target.value, ...p }; applyMouse(); } });
@@ -883,7 +886,7 @@ function refreshMaterials() {
 }
 const MODES = [["clay", "Maqueta"], ["real", "Realista"], ["orig", "Original (IFC)"], ["cls", "Por clase IFC"], ["str", "Estructural / no estructural"]];
 function renderColorPop() {
-  let h = '<div class="ttl">Modo de color</div>' + MODES.map(([k, l]) => '<label><input type="radio" name="cm" value="' + k + '"' + (k === colorMode ? " checked" : "") + "><span>" + l + "</span></label>").join("");
+  let h = '<div class="ttl">Estilo</div>' + MODES.map(([k, l]) => '<label><input type="radio" name="cm" value="' + k + '"' + (k === colorMode ? " checked" : "") + "><span>" + l + "</span></label>").join("");
   if (colorMode === "cls") {
     h += '<div class="leg">' + [...classes.keys()].filter(c => !skip.has(c)).map(c => '<div><i style="background:#' + hashColor(c).getHexString() + '"></i>' + esc(ES[c] || c) + "</div>").join("") + "</div>";
   } else if (colorMode === "str") {
@@ -1283,11 +1286,28 @@ NAVS.forEach(([id, m]) => $("#" + id).addEventListener("click", () => {
 }));
 $("#bFit").addEventListener("click", () => {
   if (!meshes.length) return;
+  if (selected != null && byEid.has(selected)) { focusElement(selected); return; } // con una pieza seleccionada, ajusta a ella
+  const b = new THREE.Box3(); // si no, a lo que está visible
+  for (const m of meshes) if (m.visible && !skip.has(m.userData.cls)) b.expandByObject(m);
+  if (b.isEmpty()) b.copy(box);
+  const c = b.getCenter(new THREE.Vector3()), r = Math.max(b.getSize(new THREE.Vector3()).length() / 2, 0.5);
   const d = camera.position.clone().sub(controls.target).normalize();
-  const dist = R / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * (camera.aspect < 1 ? 1.2 / camera.aspect : 1.3) * scaleNow;
-  flyTo(center.clone().addScaledVector(d, dist), center.clone());
+  const dist = r / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * (camera.aspect < 1 ? 1.2 / camera.aspect : 1.3);
+  flyTo(c.clone().addScaledVector(d, dist), c);
 });
-$("#bInfo").addEventListener("click", () => { showTab("props"); setSheet(true); });
+const PROPS_EMPTY_HTML = $("#propsEmpty").innerHTML;
+$("#bInfo").addEventListener("click", () => {
+  if (!meshes.length) return;
+  showTab("props"); setSheet(true);
+  if (selected != null) return; // con una pieza seleccionada se ven sus propiedades
+  const sz = box.getSize(new THREE.Vector3()), kv = (k, v) => '<div class="kv"><span>' + esc(k) + "</span><b>" + esc(String(v)) + "</b></div>";
+  $("#propsEmpty").innerHTML = '<div class="ttl" style="padding:10px 12px;font-weight:750">Información del modelo</div>' +
+    kv("Archivo", $("#fileName").textContent) + kv("Elementos", byEid.size) + kv("Clases IFC", classes.size) +
+    kv("Niveles", planLevels.length > 1 ? planLevels.length + " (" + planLevels.map(l => l.label).join(", ") + ")" : "1") +
+    kv("Ancho × fondo", fmtN(sz.x) + " × " + fmtN(sz.z) + " m") + kv("Altura", fmtN(sz.y) + " m") +
+    '<div class="sum" style="border:0">' + PROPS_EMPTY_HTML + "</div>";
+  $("#propsEmpty").hidden = false; $("#propsBody").hidden = true;
+});
 /* un solo panel abierto a la vez */
 function setVMenu(on) {
   if (on) placePop("#vmenu", "#bViewMenu");
@@ -1493,7 +1513,8 @@ canvas.addEventListener("pointerup", e => {
   if (moved > 6 || dt > 600 || e.button > 0 || (navMode !== "sel" && !measuring)) return;
   const hit = pick(e);
   if (measuring) { if (mType === "box") { if (hit) { selectElement(hit.object.userData.eid, false); showBoxOf(hit.object.userData.eid); } } else if (hit) addPoint(hit.point); return; }
-  selectElement(hit ? hit.object.userData.eid : null);
+  const eid = hit ? hit.object.userData.eid : null;
+  selectElement(eid != null && eid === selected ? null : eid); // clic de nuevo sobre la pieza (o en el vacío) deselecciona
 });
 const mid = new THREE.Vector3();
 let mType = "dist", mClosed = false, mText = "", mAnchor = new THREE.Vector3();
