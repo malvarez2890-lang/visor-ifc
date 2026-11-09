@@ -20,6 +20,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <script type="importmap">{"imports":{"three":"./vendor/three.module.js","three/addons/":"./vendor/addons/"}}</script>
+<link rel="icon" type="image/svg+xml" href="logo.svg">
 <style>
 /* Layout: herramienta de revisión a pantalla completa. Visor a la izquierda, panel de modelo y propiedades a la derecha;
    en teléfono el panel pasa a una hoja inferior. Tono de plano técnico: blanco y negro con un solo acento naranja de selección. */
@@ -170,6 +171,254 @@ aside{width:340px;flex:none;border:2px solid var(--ink);background:var(--panel);
   .pop{top:120px}
 }
 @media (prefers-reduced-motion:reduce){aside{transition:none}}
+/* ============================================================
+   VISOR IFC — INTERFAZ A+B / MINIMAL + BIM PROFESSIONAL
+   Compatible con el HTML original (sin cambios de JavaScript).
+   Pegar AL FINAL de la etiqueta <style> existente.
+   Logo: logo.svg (raíz del sitio).
+   ============================================================ */
+:root,
+:root[data-theme="light"]{
+  --bg:#EAF0F7;--panel:#FFFFFF;--ink:#12233C;--ink2:#60718A;
+  --line:#DCE5F0;--viewport:#E9F0FA;--accent:#145DEA;
+  --accent-ink:#FFFFFF;--hover:#EEF4FD;
+  --ifc-blue:#145DEA;--ifc-blue2:#01A3E8;--ifc-soft:#EAF2FF;
+  --ifc-elev:0 7px 28px rgba(32,63,104,.09),0 2px 7px rgba(32,63,104,.04);
+  --ifc-faint:0 1px 5px rgba(25,53,96,.06);
+  --f-display:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+  --f-body:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+  --f-mono:ui-monospace,"SFMono-Regular",Consolas,monospace;
+  color-scheme:light;
+}
+:root[data-theme="dark"]{
+  --bg:#0D1729;--panel:#17263C;--ink:#F0F5FC;--ink2:#A1B2CB;
+  --line:#31445F;--viewport:#101E33;--accent:#23A2FF;
+  --accent-ink:#07182C;--hover:#243B58;
+  --ifc-blue:#23A2FF;--ifc-blue2:#00C2FF;--ifc-soft:#1B3A61;
+  --ifc-elev:0 9px 36px rgba(0,0,0,.30),0 2px 8px rgba(0,0,0,.18);
+  --ifc-faint:0 1px 5px rgba(0,0,0,.2);
+  color-scheme:dark;
+}
+@media(prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0D1729;--panel:#17263C;--ink:#F0F5FC;--ink2:#A1B2CB;
+    --line:#31445F;--viewport:#101E33;--accent:#23A2FF;
+    --accent-ink:#07182C;--hover:#243B58;
+    --ifc-blue:#23A2FF;--ifc-blue2:#00C2FF;--ifc-soft:#1B3A61;
+    --ifc-elev:0 9px 36px rgba(0,0,0,.30),0 2px 8px rgba(0,0,0,.18);
+    --ifc-faint:0 1px 5px rgba(0,0,0,.2);
+    color-scheme:dark;
+  }
+}
+html,body{min-width:0}
+body{background:var(--bg);color:var(--ink);font:13px/1.45 var(--f-body);
+  padding-left:max(8px,env(safe-area-inset-left,0px));
+  padding-right:max(8px,env(safe-area-inset-right,0px));}
+#app{gap:8px;padding-block:8px}
+header{position:relative;min-height:60px;gap:9px;padding:8px 14px;
+  background:var(--panel);border:1px solid var(--line);border-radius:13px;
+  box-shadow:var(--ifc-faint);flex-wrap:nowrap}
+/* Marca: icono SVG de edificio/cubo diseñado para esta interfaz */
+.brand{display:flex;align-items:center;gap:10px;flex:none;margin-right:8px;
+  font:750 20px/1 var(--f-body);letter-spacing:-.65px;text-transform:none;white-space:nowrap}
+.brand::before{content:"";display:block;flex:none;width:38px;height:42px;
+  background-image:url("logo.svg");background-repeat:no-repeat;
+  background-position:center;background-size:contain}
+.file{flex:1 1 160px;min-width:45px;max-width:none;padding:0 13px;
+  border-left:1px solid var(--line);font:500 12px var(--f-body);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.btn{min-height:36px;gap:7px;padding:7px 11px;white-space:nowrap;
+  border:1px solid var(--line);border-radius:9px;background:var(--panel);
+  color:var(--ink);font:650 12px/1.25 var(--f-body);letter-spacing:0;text-transform:none;
+  box-shadow:none;transition:background .15s,border-color .15s,box-shadow .15s,transform .15s}
+.btn:hover:not(:disabled){background:var(--hover);border-color:var(--ifc-blue);
+  box-shadow:0 2px 9px rgba(36,91,180,.09)}
+.btn:active:not(:disabled){transform:translateY(1px)}
+.btn:disabled{opacity:.42;cursor:not-allowed}
+.btn.on,.btn[aria-pressed="true"],.btn.primary{
+  background:linear-gradient(135deg,var(--ifc-blue),#176DD5);
+  border-color:transparent;color:#fff;box-shadow:0 3px 11px rgba(20,93,234,.19)}
+.btn.on:hover,.btn[aria-pressed="true"]:hover,.btn.primary:hover{
+  background:linear-gradient(135deg,#0F51D4,#1278E5);color:#fff}
+.btn:focus-visible,.row:focus-visible,.tab:focus-visible,
+input:focus-visible,select:focus-visible,.eye:focus-visible{outline:2px solid var(--ifc-blue);outline-offset:2px}
+#openLbl{padding-inline:16px;min-height:38px}
+#openLbl::before{content:"+";font:400 22px/1 var(--f-body)}
+#themeBtn,#setBtn,#sheetBtn{flex:none;border-radius:9px;min-width:38px;justify-content:center}
+#themeBtn svg,#setBtn svg{stroke-width:1.8}
+main{gap:8px}
+#stage{background:radial-gradient(ellipse at 45% 36%,var(--viewport) 0%,var(--bg) 95%);
+  border:1px solid var(--line);border-radius:14px;box-shadow:var(--ifc-faint)}
+/* Herramientas: dos grupos reales del HTML, sin mover controles */
+.tools{left:12px;top:12px;right:12px;z-index:4;display:flex;
+  flex-wrap:wrap;align-items:flex-start;gap:8px}
+.tools .grp{align-items:center;gap:3px;padding:5px;background:var(--panel);
+  border:1px solid var(--line);border-radius:12px;box-shadow:var(--ifc-elev);
+  max-width:100%}
+.tools .grp .btn{padding:7px 10px;min-height:35px;border:1px solid transparent;
+  font-size:12px;background:transparent;box-shadow:none}
+.tools .grp .btn:hover{background:var(--hover);border-color:var(--line)}
+.tools .grp .btn.on,.tools .grp .btn[aria-pressed="true"]{
+  background:var(--ifc-soft);color:var(--ifc-blue);border-color:var(--ifc-blue);box-shadow:none}
+.tools #gViews{border-left:3px solid var(--ifc-blue)}
+.tools #gViews .btn:first-child{font-weight:750}
+.tools #gViews .btn[data-v="iso"]::before{content:"◇";font-size:17px;line-height:0}
+.tools #gViews .btn[data-v="top"]::before{content:"▦";font-size:14px;line-height:0}
+.tools #gViews .btn[data-v="front"]::before{content:"▥";font-size:14px;line-height:0}
+.tools #gViews .btn[data-v="side"]::before{content:"▤";font-size:14px;line-height:0}
+.tools #bSection,.tools #bMeasure{font-weight:750}
+.tools #bSection::before{content:"◩";font-size:16px;line-height:0}
+.tools #bMeasure::before{content:"⌁";font-size:18px;line-height:0}
+.tools #bLayers::before{content:"▱";font-size:18px;line-height:0}
+.tools #bXray::before{content:"◉";font-size:14px;line-height:0}
+/* Menús y panel de corte */
+.pop,.sect,.setpop{border:1px solid var(--line);border-radius:12px;
+  box-shadow:var(--ifc-elev);background:var(--panel)}
+.pop{top:108px;left:12px;max-width:calc(100% - 24px);padding:7px 0}
+.pop label{border-radius:5px;font-size:13px}
+.pop input,.setpop input[type=checkbox]{accent-color:var(--ifc-blue)}
+.pop .ttl,.setpop .ttl{font:750 11px var(--f-body);letter-spacing:.045em;color:var(--ink2)}
+.pop input[type=text],.setpop select{border:1px solid var(--line);border-radius:8px;
+  background:var(--bg);min-height:34px;padding:6px 9px}
+.sect{left:12px;bottom:12px;padding:11px;max-width:calc(100% - 24px)}
+.sect.show{gap:8px}
+.srow{gap:7px}
+.srow>.btn:first-child{min-width:60px;justify-content:center}
+.sect .btn{border-radius:7px;min-height:31px}
+.sect .sv{min-width:76px;color:var(--ink);font-size:11px}
+.sect input[type=range]{accent-color:var(--ifc-blue);width:clamp(90px,12vw,180px)}
+.sect .srow:last-child{padding-top:7px;border-top:1px solid var(--line)}
+.sect .srow:last-child .btn{border-color:transparent;color:var(--ifc-blue);background:transparent}
+.sect.show ~ .mbar{bottom:184px}
+.mbar{left:12px;bottom:12px;gap:5px}
+.mbar .btn{min-height:33px;border-radius:8px;box-shadow:var(--ifc-faint)}
+.vcube{top:110px;right:14px}
+.vcube .rw{gap:5px}
+.vcube .rw button{width:32px;height:30px;border:1px solid var(--line);
+  border-radius:8px;background:var(--panel);color:var(--ink);box-shadow:var(--ifc-faint)}
+.vcube .rw button:hover{background:var(--ifc-soft);border-color:var(--ifc-blue);color:var(--ifc-blue)}
+.hint{right:12px;bottom:12px;border:1px solid var(--line);border-radius:8px;
+  box-shadow:var(--ifc-faint);padding:7px 10px;font:500 11px var(--f-body);
+  color:var(--ink2);background:var(--panel)}
+.room{border:1px solid var(--line);border-left:3px solid var(--ifc-blue);
+  border-radius:8px;box-shadow:var(--ifc-faint)}
+.room b{font:750 12px var(--f-body);letter-spacing:0;text-transform:none}
+.room i{font:11px var(--f-mono)}
+/* Estado sin modelo */
+.status{gap:13px;background:color-mix(in srgb,var(--viewport) 84%,transparent)}
+.status::before{content:"";width:70px;height:78px;
+  background-image:url("logo.svg");background-size:contain;
+  background-position:center;background-repeat:no-repeat;filter:drop-shadow(0 5px 10px rgba(20,93,234,.10))}
+.status h2{font:760 clamp(24px,3vw,34px)/1.14 var(--f-body);
+  letter-spacing:-.035em;text-transform:none}
+.status p{max-width:48ch;font-size:13px}
+.status .note{font:11px/1.6 var(--f-body)}
+.btn.big{min-height:48px;padding:11px 20px;font:750 15px var(--f-body);letter-spacing:0}
+.bar{height:6px;border-radius:30px}
+.bar i{border-radius:30px}
+.drop{border-radius:12px;font:750 24px var(--f-body);text-transform:none}
+/* Panel derecho de modelo, búsqueda, lista y propiedades */
+aside{width:clamp(290px,24vw,350px);border:1px solid var(--line);
+  border-radius:14px;box-shadow:var(--ifc-faint);overflow:hidden;background:var(--panel)}
+.tabs{padding:6px 7px 0;gap:4px;border-bottom:1px solid var(--line)}
+.tab{min-height:42px;padding:9px 8px;border-radius:8px 8px 0 0;
+  font:700 13px var(--f-body);letter-spacing:0;text-transform:none}
+.tab:hover{background:var(--hover);color:var(--ink)}
+.tab[aria-selected="true"]{background:var(--ifc-soft);color:var(--ifc-blue);
+  box-shadow:inset 0 -3px 0 var(--ifc-blue)}
+#tabModel::before{content:"▧";margin-right:7px;font-size:15px}
+#tabProps::before{content:"☷";margin-right:7px;font-size:17px}
+.search{padding:11px;border-bottom:1px solid var(--line)}
+.search input{background:var(--bg);border:1px solid var(--line);
+  border-radius:9px;min-height:38px;padding:8px 11px;font:12px var(--f-body);
+  outline-offset:2px;width:100%}
+.search input:focus{border-color:var(--ifc-blue);background:var(--panel)}
+.seg{padding:5px 8px 0;border-bottom:1px solid var(--line)}
+.seg button{font:700 12px var(--f-body);letter-spacing:0;text-transform:none;
+  border-radius:7px 7px 0 0}
+.seg button[aria-pressed="true"]{color:var(--ifc-blue);
+  box-shadow:inset 0 -2px 0 var(--ifc-blue);background:var(--ifc-soft)}
+.sum{padding:9px 12px;font:11px var(--f-mono);background:var(--bg)}
+.row{padding:9px 12px;gap:8px;border-bottom:1px solid var(--line);
+  border-left:3px solid transparent;transition:background .15s}
+.row:hover{background:var(--hover);border-left-color:var(--ifc-blue2)}
+.row:focus-visible{border-left-color:var(--ifc-blue)}
+.row .nm b{font-size:12px;font-weight:650}
+.row .nm i,.row .ct{font-size:10px}
+.eye{width:32px;height:32px;border:1px solid var(--line);
+  border-radius:8px;background:var(--panel)}
+.eye.sm{width:29px;height:29px}
+.eye svg{stroke:var(--ink2);width:17px;height:17px}
+.eye:hover{background:var(--ifc-soft);border-color:var(--ifc-blue)}
+.eye:hover svg{stroke:var(--ifc-blue)}
+.props h3{padding:16px 13px 5px;font:760 18px/1.25 var(--f-body);
+  letter-spacing:-.015em;text-transform:none}
+.props .cls{padding:0 13px 12px;font:11px var(--f-mono)}
+.acts{gap:5px;padding:9px 12px}
+.acts .btn{min-height:32px;font-size:11px}
+.grp2 h4{padding:10px 12px;background:var(--ifc-soft);color:var(--ink);
+  font:750 11px var(--f-body);letter-spacing:.025em;text-transform:none}
+.kv{padding:9px 12px;gap:4px 9px;font-size:12px}
+.kv b{font-weight:650}
+.empty{font-size:13px}
+/* Ajustes para tamaños intermedios */
+@media(min-width:821px) and (max-width:1220px){
+  aside{width:285px}
+  .tools .grp .btn{font-size:11px;padding-inline:7px}
+  .brand{font-size:18px}
+}
+/* Tablet y teléfono: conservar panel inferior, scroll horizontal de herramientas */
+@media(max-width:820px){
+  body{padding-inline:4px}
+  #app{padding-block:4px;gap:5px}
+  header{min-height:52px;gap:5px;padding:5px 7px;flex-wrap:nowrap}
+  .brand{font-size:16px;letter-spacing:-.35px;gap:5px;margin-right:0}
+  .brand::before{width:27px;height:32px}
+  .file{padding:0 6px;flex:1 1 45px;font-size:11px}
+  #openLbl{padding-inline:10px;font-size:11px}
+  #openLbl::before{font-size:16px}
+  #setBtn,#themeBtn,#sheetBtn{min-width:34px;padding:5px}
+  #sheetBtn{font-size:11px}
+  main{gap:0}
+  #stage{border-radius:11px}
+  .tools{left:6px;right:6px;top:6px;flex-wrap:nowrap;overflow-x:auto;
+    overflow-y:hidden;gap:6px;padding-bottom:5px;pointer-events:auto;
+    scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+  .tools .grp{flex:none;flex-wrap:nowrap;max-width:none;padding:4px;gap:2px;
+    border-radius:10px}
+  .tools .grp .btn{flex:none;min-height:37px;padding:7px 9px;font-size:11px}
+  .pop{top:63px;left:6px;max-height:55%}
+  .vcube{top:75px;right:8px;width:84px}
+  .vcube canvas{width:84px;height:84px}
+  .vcube .rw button{width:26px;height:26px}
+  .sect{left:6px;bottom:6px;max-width:calc(100% - 12px);padding:8px}
+  .sect input[type=range]{width:clamp(64px,23vw,170px)}
+  .sect.show ~ .mbar{bottom:184px}
+  .mbar{left:6px;bottom:6px;max-width:calc(100% - 12px)}
+  .mbar .btn{min-height:34px}
+  aside{width:auto;left:0;right:0;bottom:0;height:min(57%,440px);
+    border-radius:16px 16px 0 0;box-shadow:0 -11px 36px rgba(0,15,38,.22);
+    border:1px solid var(--line)}
+  aside.open{transform:none}
+  aside::before{content:"";width:38px;height:4px;display:block;flex:none;
+    margin:7px auto 0;border-radius:10px;background:var(--line)}
+  .hint{display:none}
+}
+@media(max-width:480px){
+  .brand{font-size:14px}
+  .brand::before{width:25px;height:29px}
+  .file{font-size:10px;min-width:0}
+  #openLbl{padding-inline:8px}
+  #setBtn,#themeBtn{min-width:30px}
+  .tabs{padding-top:2px}
+  .tab{font-size:12px}
+  .sect .srow{gap:4px}
+  .sect .sv{min-width:62px;font-size:10px}
+  .sect .btn{font-size:10px;min-width:0}
+}
+@media(prefers-reduced-motion:reduce){
+  .btn,.row{transition:none}
+}
 </style>
 
 </head><body>
