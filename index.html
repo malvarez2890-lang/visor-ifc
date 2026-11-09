@@ -419,6 +419,8 @@ aside{width:clamp(290px,24vw,350px);border:1px solid var(--line);
 @media(prefers-reduced-motion:reduce){
   .btn,.row{transition:none}
 }
+#planLevel{min-height:35px;max-width:190px;cursor:pointer;font-weight:650}
+#planLevel[hidden]{display:none}
 </style>
 
 </head><body>
@@ -449,6 +451,7 @@ aside{width:clamp(290px,24vw,350px);border:1px solid var(--line);
         <div class="grp" id="gViews">
           <button class="btn" data-v="iso" type="button">Isométrica</button>
           <button class="btn" data-v="top" type="button">Planta</button>
+          <select class="btn" id="planLevel" hidden aria-label="Nivel de la planta (corte a 1 m sobre el piso)" title="Nivel de la planta (corte a 1 m sobre el piso)"></select>
           <button class="btn" data-v="front" type="button">Frente</button>
           <button class="btn" data-v="side" type="button">Lateral</button>
         </div>
@@ -818,7 +821,7 @@ async function loadBuffer(buf, label) {
     setupSection(); refreshMaterials(); applyLook(); scaleNow = 1; setView("iso", true);
     $("#fileName").textContent = label;
     skip.forEach(c => { if (classes.has(c)) classHidden.add(c); });
-    buildSpatial(); loadSavedViews(); loadRooms(); applyVisibility(); statusOff(); $("#q").value = "";
+    buildSpatial(); buildPlanLevels(); loadSavedViews(); loadRooms(); applyVisibility(); statusOff(); $("#q").value = "";
   } catch (e) {
     console.error(e);
     status("No se pudo abrir el archivo", "El IFC puede estar dañado o usar una versión que el visor no lee. Detalle: " + (e && e.message ? e.message : e), false);
@@ -897,12 +900,42 @@ function setView(v, instant) {
   document.querySelectorAll("#gViews .btn").forEach(b => b.classList.toggle("on", b.dataset.v === v));
 }
 function showRoofAgain() { if (roomsOn) setRooms(false); if (roofHidden) { setRoof(false); roofAuto = false; } }
+/* niveles para la planta: cota del piso de cada nivel, medida en la geometría (tope de su losa más baja) */
+let planLevels = [];
+const PLAN_CUT = 1; // m sobre el piso del nivel
+function buildPlanLevels() {
+  planLevels = [];
+  if (tree) nodeById.forEach(n => {
+    if (n.type !== "IFCBUILDINGSTOREY" || !n.all.length) return;
+    let slab = null, lo = Infinity;
+    const tmp = new THREE.Box3(), ctr = new THREE.Vector3();
+    for (const e of n.all) {
+      const ms = byEid.get(e); if (!ms) continue;
+      const cls = names.get(e)?.cls; if (skip.has(cls)) continue;
+      tmp.makeEmpty(); ms.forEach(m => tmp.expandByObject(m)); if (tmp.isEmpty()) continue;
+      lo = Math.min(lo, tmp.min.y);
+      if (cls === "IfcSlab" && !roofSet.has(e) && (slab === null || tmp.getCenter(ctr).y < slab.cy)) slab = { cy: ctr.y, top: tmp.max.y };
+    }
+    if (lo === Infinity) return;
+    planLevels.push({ label: n.label, y: slab ? slab.top : lo });
+  });
+  planLevels.sort((a, b) => a.y - b.y);
+  if (!planLevels.length) planLevels.push({ label: "Nivel base", y: floorY });
+  const base = planLevels[0].y, sel = $("#planLevel");
+  sel.innerHTML = planLevels.map((l, i) => '<option value="' + i + '">' + esc(l.label) + " · " + (l.y - base >= 0 ? "+" : "") + fmtN(l.y - base) + " m</option>").join("");
+  sel.hidden = planLevels.length < 2;
+}
+function planCut() {
+  const l = planLevels[Number($("#planLevel").value) || 0] || { y: floorY };
+  clipAuto = true; clip.y.on = true; clip.y.flip = false;
+  clip.y.t = Math.min(1, Math.max(0, (l.y + PLAN_CUT - box.min.y) / Math.max(box.max.y - box.min.y, 1e-6)));
+  syncSectUI(); showSect(true); updateClip();
+}
+$("#planLevel").addEventListener("change", () => { if (!meshes.length) return; if (viewKey !== "top") { setView("top"); } viewHooks("top"); });
 function viewHooks(k) {
   if (k === "top") {
-    if (clip.y.on) return;
-    clipAuto = true; clip.y.on = true; clip.y.flip = false;
-    clip.y.t = Math.min(1, Math.max(0, (floorY + 1 - box.min.y) / Math.max(box.max.y - box.min.y, 1e-6)));
-    syncSectUI(); showSect(true); updateClip();
+    if (clip.y.on && !clipAuto) return;
+    planCut();
   } else if (clipAuto) {
     clipAuto = false; clip.y.on = false; clip.y.flip = false; clip.y.t = 1; syncSectUI(); updateClip(); if (!anyCut()) showSect(false);
   }
