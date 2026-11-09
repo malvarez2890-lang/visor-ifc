@@ -260,12 +260,12 @@ main{gap:8px}
 .tools .grp .btn:hover{background:var(--hover);border-color:var(--line)}
 .tools .grp .btn.on,.tools .grp .btn[aria-pressed="true"]{
   background:var(--ifc-soft);color:var(--ifc-blue);border-color:var(--ifc-blue);box-shadow:none}
-.tools #gViews{border-left:3px solid var(--ifc-blue)}
-.tools #gViews .btn:first-child{font-weight:750}
-.tools #gViews .btn[data-v="iso"]::before{content:"◇";font-size:17px;line-height:0}
-.tools #gViews .btn[data-v="top"]::before{content:"▦";font-size:14px;line-height:0}
-.tools #gViews .btn[data-v="front"]::before{content:"▥";font-size:14px;line-height:0}
-.tools #gViews .btn[data-v="side"]::before{content:"▤";font-size:14px;line-height:0}
+
+.tools #vmenu [data-v]:first-child{font-weight:750}
+.tools #vmenu [data-v][data-v="iso"]::before{content:"◇";font-size:17px;line-height:0}
+.tools #vmenu [data-v][data-v="top"]::before{content:"▦";font-size:14px;line-height:0}
+.tools #vmenu [data-v][data-v="front"]::before{content:"▥";font-size:14px;line-height:0}
+.tools #vmenu [data-v][data-v="side"]::before{content:"▤";font-size:14px;line-height:0}
 .tools #bSection,.tools #bMeasure{font-weight:750}
 .tools #bSection::before{content:"◩";font-size:16px;line-height:0}
 .tools #bMeasure::before{content:"⌁";font-size:18px;line-height:0}
@@ -419,7 +419,13 @@ aside{width:clamp(290px,24vw,350px);border:1px solid var(--line);
 @media(prefers-reduced-motion:reduce){
   .btn,.row{transition:none}
 }
-#planLevel{min-height:35px;max-width:190px;cursor:pointer;font-weight:650}
+#vmenu{min-width:190px;padding:7px 8px;display:none;flex-direction:column;gap:3px}
+#vmenu.show{display:flex}
+#vmenu .btn{justify-content:flex-start;width:100%;border-color:transparent}
+#vmenu .btn:hover{border-color:var(--line)}
+#vmenu .ttl{padding:6px 6px 2px}
+#planLevel{display:flex;flex-direction:column;gap:2px;margin-left:12px;padding-left:6px;border-left:2px solid var(--line)}
+#planLevel .btn{min-height:30px;font-weight:550;font-size:11.5px}
 #planLevel[hidden]{display:none}
 </style>
 
@@ -448,25 +454,30 @@ aside{width:clamp(290px,24vw,350px);border:1px solid var(--line);
     <div id="stage" class="empty">
       <canvas id="cv" aria-label="Vista 3D del modelo IFC"></canvas>
       <div class="tools">
-        <div class="grp" id="gViews">
-          <button class="btn" data-v="iso" type="button">Isométrica</button>
-          <button class="btn" data-v="top" type="button">Planta</button>
-          <select class="btn" id="planLevel" hidden aria-label="Nivel de la planta (corte a 1 m sobre el piso)" title="Nivel de la planta (corte a 1 m sobre el piso)"></select>
-          <button class="btn" data-v="front" type="button">Frente</button>
-          <button class="btn" data-v="side" type="button">Lateral</button>
-        </div>
         <div class="grp">
+          <button class="btn" id="bViewMenu" type="button" aria-haspopup="true" aria-expanded="false">Vista ▾</button>
           <button class="btn" id="bRoof" type="button" aria-pressed="false">Ocultar cubierta</button>
           <button class="btn" id="bLayers" type="button" aria-haspopup="true" aria-expanded="false">Capas</button>
           <button class="btn" id="bColor" type="button" aria-haspopup="true" aria-expanded="false">Color</button>
           <button class="btn" id="bSection" type="button" aria-pressed="false">Corte</button>
           <button class="btn" id="bMeasure" type="button" aria-pressed="false">Medir</button>
           <button class="btn" id="bRooms" type="button" aria-pressed="false" hidden>Recintos</button>
-          <button class="btn" id="bViews" type="button" aria-haspopup="true" aria-expanded="false">Vistas</button>
+          <button class="btn" id="bViews" type="button" aria-haspopup="true" aria-expanded="false">Guardadas</button>
           <button class="btn" id="bXray" type="button" aria-pressed="false">Rayos X</button>
           <button class="btn" id="bExplode" type="button" aria-pressed="false">Explotar</button>
           <button class="btn" id="bShowAll" type="button">Mostrar todo</button>
         </div>
+      </div>
+      <div class="pop" id="vmenu" role="menu">
+        <div class="ttl">Vista</div>
+        <button class="btn" data-v="iso" type="button">Isométrica</button>
+        <button class="btn" data-v="top" type="button">Planta</button>
+        <div id="planLevel" hidden role="group" aria-label="Nivel de la planta (corte a 1 m sobre el piso)"></div>
+        <div class="ttl">Elevaciones</div>
+        <button class="btn" data-v="front" type="button">Frente</button>
+        <button class="btn" data-v="back" type="button">Atrás</button>
+        <button class="btn" data-v="left" type="button">Izquierda</button>
+        <button class="btn" data-v="side" type="button">Derecha</button>
       </div>
       <div class="pop" id="colorPop" role="menu"></div>
       <div class="pop" id="layersPop" role="menu"></div>
@@ -897,7 +908,7 @@ function setView(v, instant) {
   const to = center.clone().addScaledVector(d, dist);
   if (instant) { camera.position.copy(to); controls.target.copy(center); controls.update(); }
   else flyTo(to, center.clone());
-  document.querySelectorAll("#gViews .btn").forEach(b => b.classList.toggle("on", b.dataset.v === v));
+  document.querySelectorAll("#vmenu [data-v]").forEach(b => b.classList.toggle("on", b.dataset.v === v));
 }
 function showRoofAgain() { if (roomsOn) setRooms(false); if (roofHidden) { setRoof(false); roofAuto = false; } }
 /* niveles para la planta: cota del piso de cada nivel, medida en la geometría (tope de su losa más baja) */
@@ -921,17 +932,24 @@ function buildPlanLevels() {
   });
   planLevels.sort((a, b) => a.y - b.y);
   if (!planLevels.length) planLevels.push({ label: "Nivel base", y: floorY });
+  planIdx = 0; paintPlanLevels();
+}
+let planIdx = 0;
+function paintPlanLevels() {
   const base = planLevels[0].y, sel = $("#planLevel");
-  sel.innerHTML = planLevels.map((l, i) => '<option value="' + i + '">' + esc(l.label) + " · " + (l.y - base >= 0 ? "+" : "") + fmtN(l.y - base) + " m</option>").join("");
+  sel.innerHTML = planLevels.map((l, i) => '<button class="btn' + (i === planIdx ? " on" : "") + '" type="button" data-lvl="' + i + '">' + esc(l.label) + " · " + (l.y - base >= 0 ? "+" : "") + fmtN(l.y - base) + " m</button>").join("");
   sel.hidden = planLevels.length < 2;
 }
 function planCut() {
-  const l = planLevels[Number($("#planLevel").value) || 0] || { y: floorY };
+  const l = planLevels[planIdx] || { y: floorY };
   clipAuto = true; clip.y.on = true; clip.y.flip = false;
   clip.y.t = Math.min(1, Math.max(0, (l.y + PLAN_CUT - box.min.y) / Math.max(box.max.y - box.min.y, 1e-6)));
   syncSectUI(); showSect(true); updateClip();
 }
-$("#planLevel").addEventListener("change", () => { if (!meshes.length) return; if (viewKey !== "top") { setView("top"); } viewHooks("top"); });
+$("#planLevel").addEventListener("click", e => {
+  const b = e.target.closest("[data-lvl]"); if (!b || !meshes.length) return;
+  planIdx = Number(b.dataset.lvl); paintPlanLevels(); if (viewKey !== "top") setView("top"); viewHooks("top");
+});
 function viewHooks(k) {
   if (k === "top") {
     if (clip.y.on && !clipAuto) return;
@@ -942,8 +960,8 @@ function viewHooks(k) {
   if (k !== "top" && roofAuto && !roomsOn) { setRoof(false); roofAuto = false; }
 }
 ["#sectBox", "#bSection"].forEach(q => $(q).addEventListener("pointerdown", () => { clipAuto = false; }));
-document.querySelectorAll("#gViews .btn").forEach(b => b.addEventListener("click", () => { if (!meshes.length) return; setView(b.dataset.v); viewHooks(b.dataset.v); if (b.dataset.v === "iso") showRoofAgain(); }));
-controls.addEventListener("start", () => { anim = null; spin = null; document.querySelectorAll("#gViews .btn").forEach(b => b.classList.remove("on")); });
+document.querySelectorAll("#vmenu [data-v]").forEach(b => b.addEventListener("click", () => { if (!meshes.length) return; setView(b.dataset.v); viewHooks(b.dataset.v); if (b.dataset.v === "iso") showRoofAgain(); }));
+controls.addEventListener("start", () => { anim = null; spin = null; document.querySelectorAll("#vmenu [data-v]").forEach(b => b.classList.remove("on")); });
 
 
 /* ---------- cubo de orientación ---------- */
@@ -1011,7 +1029,7 @@ let spin = null;
 function snapDir(d) {
   if (!meshes.length) return;
   if (Math.abs(d.x) < 1e-3 && d.y > 0.99 && Math.abs(d.z) < 1e-3) { setView("top"); viewHooks("top"); return; }
-  document.querySelectorAll("#gViews .btn").forEach(b => b.classList.remove("on"));
+  document.querySelectorAll("#vmenu [data-v]").forEach(b => b.classList.remove("on"));
   viewHooks("iso");
   if (Math.abs(d.x) < 1e-3 && Math.abs(d.z) < 1e-3) d.z = 1e-4; // vista inferior: evita el eje vertical exacto
   const dist = Math.max(camera.position.distanceTo(controls.target), R * 1.2);
@@ -1172,7 +1190,11 @@ function setupSection() {
   AXES.forEach(a => { clip[a].on = false; clip[a].flip = false; clip[a].t = 1; });
   syncSectUI(); showSect(false); updateClip();
 }
-$("#bSection").addEventListener("click", () => { if (meshes.length) showSect(!$("#sectBox").classList.contains("show")); });
+$("#bSection").addEventListener("click", () => {
+  if (!meshes.length) return;
+  if ($("#sectBox").classList.contains("show")) { clipAuto = false; setupSection(); showSect(false); } // segundo clic: quita el corte
+  else showSect(true);
+});
 $("#sectBox").addEventListener("click", e => {
   const r = e.target.closest("[data-ax]");
   if (e.target.id === "sectClear") { setupSection(); showSect(true); return; }
@@ -1208,7 +1230,7 @@ function applySavedView(v) {
   AXES.forEach(a => { clip[a].on = false; clip[a].flip = false; clip[a].t = 1; });
   if (v.clip.x) AXES.forEach(a => Object.assign(clip[a], v.clip[a])); else if (v.clip.axis) Object.assign(clip[v.clip.axis], { on: !!v.clip.on, flip: v.clip.flip, t: v.clip.t });
   syncSectUI(); updateClip(); showSect(anyCut());
-  document.querySelectorAll("#gViews .btn").forEach(b => b.classList.remove("on"));
+  document.querySelectorAll("#vmenu [data-v]").forEach(b => b.classList.remove("on"));
   flyTo(new THREE.Vector3(...v.pos), new THREE.Vector3(...v.tgt), 800);
   if ($("#colorPop").classList.contains("show")) renderColorPop();
 }
@@ -1232,6 +1254,17 @@ function setViewsPop(on) { $("#viewsPop").classList.toggle("show", on); $("#bVie
 $("#bViews").addEventListener("click", () => { if (!meshes.length) return; const on = !$("#viewsPop").classList.contains("show"); setPop(false); setLayersPop(false); setViewsPop(on); });
 ["#bColor", "#bLayers"].forEach(q => $(q).addEventListener("click", () => setViewsPop(false)));
 document.addEventListener("pointerdown", e => { if (!e.target.closest("#viewsPop,#bViews")) setViewsPop(false); });
+/* un solo panel abierto a la vez */
+function setVMenu(on) {
+  if (on) { const s = $("#stage").getBoundingClientRect(), r = $("#bViewMenu").getBoundingClientRect(), m = $("#vmenu").style; m.top = Math.round(r.bottom - s.top + 6) + "px"; m.left = Math.max(6, Math.round(r.left - s.left)) + "px"; }
+  $("#vmenu").classList.toggle("show", on); $("#bViewMenu").classList.toggle("on", on); $("#bViewMenu").setAttribute("aria-expanded", String(on)); }
+const PANELS = { bColor: () => setPop(false), bLayers: () => setLayersPop(false), bViews: () => setViewsPop(false), bViewMenu: () => setVMenu(false),
+  bSection: () => { if ($("#sectBox").classList.contains("show")) showSect(false); }, bMeasure: () => { if (measuring) $("#bMeasure").click(); } };
+Object.keys(PANELS).forEach(id => $("#" + id).addEventListener("click", () => Object.keys(PANELS).forEach(o => { if (o !== id) PANELS[o](); }), true));
+$("#bViewMenu").addEventListener("click", () => { if (meshes.length) setVMenu(!$("#vmenu").classList.contains("show")); });
+document.addEventListener("pointerdown", e => { if (!e.target.closest("#vmenu,#bViewMenu")) setVMenu(false); });
+$("#vmenu").addEventListener("click", e => { if (e.target.closest("[data-v],[data-lvl]")) setVMenu(false); });
+
 
 /* ---------- estructura espacial (Sitio → Edificio → Piso → Elemento) ---------- */
 let tree = null, listMode = "cls";
